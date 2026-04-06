@@ -104,6 +104,9 @@ def delete_user_me(*, session: SessionDep, current_user: CurrentUser) -> Any:
     """
     Delete own user.
     """
+    session.delete(current_user)
+    session.commit()
+    return Message(message="User deleted successfully")
 
 
 @router.patch("/me/password", response_model=Message)
