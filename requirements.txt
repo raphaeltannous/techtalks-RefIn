@@ -1,0 +1,9 @@
+fastapi[standard]
+sqlmodel
+alembic
+pwdlib
+pwdlib[argon2]
+pwdlib[bcrypt]
+tenacity
+pyjwt
+psycopg2
