@@ -11,24 +11,11 @@ if TYPE_CHECKING:
     from user_profile import UserProfile
 
 
-class UserCertificateBase(SQLModel):
-    name: str = Field(max_length=100)
-    issuing_organization: str = Field(max_length=100)
-
-    issuing_date: datetime | None = Field(
-        default=None,
-        sa_type=DateTime(timezone=True),  # type: ignore
-    )
-    expire_date: datetime | None = Field(
-        default=None,
-        sa_type=DateTime(timezone=True),  # type: ignore
-    )
-
-    credential_id: str = Field(max_length=80)
-    credential_url: str = Field(max_length=500)
+class UserSkillBase(SQLModel):
+    skill: str = Field(max_length=50)
 
 
-class UserCertificate(UserCertificateBase, table=True):
+class UserSkill(UserSkillBase, table=True):
     @declared_attr.directive  # type: ignore[misc]
     @classmethod
     def __tablename__(cls) -> str:  # pyright: ignore[reportIncompatibleVariableOverride]
@@ -59,5 +46,5 @@ class UserCertificate(UserCertificateBase, table=True):
     )
 
     user_profile: "UserProfile" = Relationship(
-        back_populates="user_certifications",
+        back_populates="user_skills",
     )
