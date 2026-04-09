@@ -54,21 +54,21 @@ class UserProfile(UserProfileBase, table=True):
         },
     )
 
-    user: User = Relationship(
+    user: "User" = Relationship(
         back_populates="user_profile",
     )
-    user_links: list[UserLink] = Relationship(
+    user_links: list["UserLink"] = Relationship(
         back_populates="user_profile",
     )
-    user_projects: list[UserProject] = Relationship(
+    user_projects: list["UserProject"] = Relationship(
         back_populates="user_profile",
     )
-    user_certifications: list[UserCertificate] = Relationship(
+    user_certifications: list["UserCertificate"] = Relationship(
         back_populates="user_profile",
     )
-    user_languages: list[UserLanguage] = Relationship(
+    user_languages: list["UserLanguage"] = Relationship(
         back_populates="user_profile",
     )
-    user_experiences: list[UserExperience] = Relationship(
+    user_experiences: list["UserExperience"] = Relationship(
         back_populates="user_profile",
     )

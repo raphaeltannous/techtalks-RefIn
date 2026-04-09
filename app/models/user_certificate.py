@@ -58,6 +58,6 @@ class UserCertificate(UserCertificateBase, table=True):
         },
     )
 
-    user_profile: UserProfile = Relationship(
+    user_profile: "UserProfile" = Relationship(
         back_populates="user_certifications",
     )
