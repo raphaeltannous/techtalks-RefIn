@@ -1,6 +1,6 @@
 import crud.users
 from config import settings
-from models.users import User, UserCreate
+from models.user import User, UserCreate
 from sqlmodel import Session, select
 
 from .engine import engine

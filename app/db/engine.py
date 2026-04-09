@@ -1,5 +1,5 @@
 from config import settings
-from models import user_profile, users
+from models import user, user_profile
 from sqlmodel import create_engine
 
 # Make sure all SQLModels are imported from (models)

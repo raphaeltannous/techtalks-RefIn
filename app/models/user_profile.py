@@ -8,7 +8,7 @@ from sqlalchemy.orm import declared_attr
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from models.users import User
+    from models.user import User
 
 
 class UserProfileBase(SQLModel):
