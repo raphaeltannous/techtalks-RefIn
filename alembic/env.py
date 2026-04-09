@@ -11,6 +11,7 @@ from app.config import settings
 # from app.models so that they are detect
 # by alembic.
 from app.models.user import User
+from app.models.user_link import UserLink
 from app.models.user_profile import UserProfile
 
 # this is the Alembic Config object, which provides

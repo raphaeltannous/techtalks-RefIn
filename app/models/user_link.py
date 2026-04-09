@@ -5,20 +5,19 @@ from typing import TYPE_CHECKING
 from pydantic.alias_generators import to_snake
 from sqlalchemy import DateTime
 from sqlalchemy.orm import declared_attr
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship
+from sqlmodel.main import SQLModel
 
 if TYPE_CHECKING:
-    from user import User
-    from user_link import UserLink
+    from user_profile import UserProfile
 
 
-class UserProfileBase(SQLModel):
-    headline: str | None = Field(max_length=100)
-    about: str | None = Field(max_length=1_000)
-    location: str | None = Field(max_length=200)
+class UserLinkBase(SQLModel):
+    link: str = Field(max_length=250)
+    title: str = Field(max_length=50)
 
 
-class UserProfile(UserProfileBase, table=True):
+class UserLink(UserLinkBase, table=True):
     @declared_attr.directive  # type: ignore[misc]
     @classmethod
     def __tablename__(cls) -> str:  # pyright: ignore[reportIncompatibleVariableOverride]
@@ -26,15 +25,13 @@ class UserProfile(UserProfileBase, table=True):
 
     id: uuid.UUID = Field(
         default_factory=uuid.uuid4,
-        unique=True,
         index=True,
         primary_key=True,
     )
-    user_id: uuid.UUID = Field(
+    user_profile_id: uuid.UUID = Field(
         index=True,
         nullable=False,
-        primary_key=True,
-        foreign_key="user.id",
+        foreign_key="user_profile.id",
         ondelete="CASCADE",
     )
 
@@ -50,9 +47,6 @@ class UserProfile(UserProfileBase, table=True):
         },
     )
 
-    user: User = Relationship(
-        back_populates="user_profile",
-    )
-    user_links: list[UserLink] = Relationship(
-        back_populates="user_profile",
+    user_profile: UserProfile = Relationship(
+        back_populates="user_links",
     )
