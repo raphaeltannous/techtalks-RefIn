@@ -18,7 +18,12 @@ class UserBase(SQLModel):
 
 
 class User(UserBase, table=True):
-    id: uuid.UUID | None = Field(default_factory=uuid.uuid4, primary_key=True)
+    id: uuid.UUID = Field(
+        default_factory=uuid.uuid4,
+        index=True,
+        primary_key=True,
+    )
+
     hashed_password: str
     created_at: datetime | None = Field(
         default_factory=lambda: datetime.now(timezone.utc),
