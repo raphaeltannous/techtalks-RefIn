@@ -13,13 +13,23 @@ if TYPE_CHECKING:
 
 class UserProjectBase(SQLModel):
     title: str = Field(max_length=50)
-    description: str | None = Field(nullable=True, max_length=1_000)
-    link: str | None = Field(nullable=True, max_length=250)
+    description: str | None = Field(
+        default=None,
+        nullable=True,
+        max_length=1_000,
+    )
+    link: str | None = Field(
+        default=None,
+        nullable=True,
+        max_length=250,
+    )
 
     start_date: datetime | None = Field(
+        Default=None,
         sa_type=DateTime(timezone=True),  # type: ignore
     )
     end_date: datetime | None = Field(
+        Default=None,
         sa_type=DateTime(timezone=True),  # type: ignore
     )
 
