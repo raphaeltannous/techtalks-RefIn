@@ -16,9 +16,11 @@ class UserCertificateBase(SQLModel):
     issuing_organization: str = Field(max_length=100)
 
     issuing_date: datetime | None = Field(
+        default=None,
         sa_type=DateTime(timezone=True),  # type: ignore
     )
     expire_date: datetime | None = Field(
+        default=None,
         sa_type=DateTime(timezone=True),  # type: ignore
     )
 

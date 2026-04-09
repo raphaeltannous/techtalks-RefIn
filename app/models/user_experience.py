@@ -35,12 +35,16 @@ class UserExperienceBase(SQLModel):
     company: str = Field(max_length=100)
 
     location: LocationType
-    description: str | None = Field(max_length=1_000)
+    description: str | None = Field(
+        default=None,
+        max_length=1_000,
+    )
 
     start_date: datetime = Field(
         sa_type=DateTime(timezone=True),  # type: ignore
     )
     end_date: datetime | None = Field(
+        default=None,
         sa_type=DateTime(timezone=True),  # type: ignore
     )
 
