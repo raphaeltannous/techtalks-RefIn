@@ -3,6 +3,7 @@ from models import (
     user,
     user_link,
     user_profile,
+    user_project,
 )
 from sqlmodel import create_engine
 

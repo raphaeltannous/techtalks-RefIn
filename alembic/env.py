@@ -13,6 +13,7 @@ from app.config import settings
 from app.models.user import User
 from app.models.user_link import UserLink
 from app.models.user_profile import UserProfile
+from app.models.user_project import UserProject
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
