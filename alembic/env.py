@@ -6,6 +6,11 @@ from sqlmodel import SQLModel
 
 from alembic import context
 from app.config import settings
+
+# Make sure to import all the table models
+# from app.models so that they are detect
+# by alembic.
+from app.models.user_profile import UserProfile
 from app.models.users import User
 
 # this is the Alembic Config object, which provides
