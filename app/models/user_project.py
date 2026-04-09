@@ -64,10 +64,6 @@ class UserProject(UserProjectBase, table=True):
         },
     )
 
-<<<<<<< HEAD
-    
-=======
->>>>>>> 5f5d316314f7b504840456b7f7fe1335a4bc027c
     user_profile: "UserProfile" = Relationship(
         back_populates="user_projects",
     )
