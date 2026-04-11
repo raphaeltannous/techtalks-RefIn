@@ -4,13 +4,15 @@ from typing import Annotated
 import jwt
 import security.jwt_token
 from config import settings
-from db.engine import engine
+from db.postgres import engine
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from models.jwt import TokenPayload
 from models.user import User
 from pydantic import ValidationError
+from repositories.session import get_db_session
+from services.user import UserService
 from sqlmodel import Session
 
 reusable_oauth2 = OAuth2PasswordBearer(
@@ -18,12 +20,7 @@ reusable_oauth2 = OAuth2PasswordBearer(
 )
 
 
-def get_db() -> Generator[Session, None, None]:
-    with Session(engine) as session:
-        yield session
-
-
-SessionDep = Annotated[Session, Depends(get_db)]
+SessionDep = Annotated[Session, Depends(get_db_session)]
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 

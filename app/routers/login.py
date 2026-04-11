@@ -11,21 +11,18 @@ from models.user import (
     UserPublic,
 )
 
-from .deps import CurrentUser, SessionDep
-
 router = APIRouter(tags=["login"])
 
 
 @router.post("/login/access-token")
 def login_access_token(
-    session: SessionDep,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
     """
     OAuth2 compatible token login, get an access token for future requests
     """
     user = crud.users.authenticate(
-        session=session, email=form_data.username, password=form_data.password
+        email=form_data.username, password=form_data.password
     )
 
     if not user:

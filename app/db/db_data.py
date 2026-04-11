@@ -3,7 +3,7 @@ from config import settings
 from models.user import User, UserCreate
 from sqlmodel import Session, select
 
-from .engine import engine
+from .postgres import engine
 
 
 def init() -> None:
