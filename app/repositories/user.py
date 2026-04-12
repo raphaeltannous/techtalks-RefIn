@@ -1,5 +1,6 @@
 import uuid
 from abc import ABCMeta, abstractmethod
+from typing import Sequence
 
 from models.user import User
 from pydantic import EmailStr
@@ -7,6 +8,10 @@ from pydantic import EmailStr
 
 class UserRepository:
     __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def get_users(self, offset: int, limit: int) -> tuple[Sequence[User], int]:
+        pass
 
     @abstractmethod
     def get_by_id(self, user_id: uuid.UUID) -> User | None:
