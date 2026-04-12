@@ -1,14 +1,13 @@
 import logging
 
+from sqlalchemy import Engine
 from sqlmodel import Session, select
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
-
-from .postgres import engine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-max_tries = 60 * 5  # 5 minutes
+max_tries = 60  # 1 minute
 wait_seconds = 1
 
 
@@ -18,7 +17,9 @@ wait_seconds = 1
     before=before_log(logger, logging.INFO),
     after=after_log(logger, logging.WARN),
 )
-def init() -> None:
+def init(
+    engine: Engine,
+) -> None:
     try:
         with Session(engine) as session:
             # Try to create session to check if DB is awake
