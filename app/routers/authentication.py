@@ -29,7 +29,7 @@ def login(
     if not token:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorret email or password",
+            detail="Incorrect email or password",
         )
 
     return token
@@ -49,12 +49,14 @@ def login_status(
     return current_user
 
 
-@router.post("/register")
+@router.post(
+    "/register",
+    response_model=UserPublic,
+)
 def register(
     *,
     user_repository: Annotated[UserService, Depends(get_user_service)],
     user_in: UserRegister,
-    response_model=UserPublic,
 ) -> Any:
     """
     Register.
