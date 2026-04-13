@@ -28,6 +28,9 @@ class UserService:
 
     def get_by_id(self, id: uuid.UUID) -> User | None:
         return self.user_repository.get_by_id(id)
-
+    
     def get_by_email(self, email: EmailStr) -> User | None:
-        pass
+        return self.user_repository.get_by_email(email)
+
+    def create_user(self, email: EmailStr, password: str, is_admin: bool = False) -> User:
+        return self.user_repository.create_user(email, password, is_admin)
