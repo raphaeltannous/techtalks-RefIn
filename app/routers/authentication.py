@@ -8,6 +8,8 @@ from services.user import UserService
 
 from routers.deps import get_user_service
 
+from .deps import CurrentUser
+
 router = APIRouter(
     tags=["authentication"],
 )
@@ -31,6 +33,20 @@ def login(
         )
 
     return token
+
+
+@router.post(
+    "/login/status",
+    response_model=UserPublic,
+)
+def login_status(
+    *,
+    current_user: CurrentUser,
+) -> Any:
+    """
+    If logged in.
+    """
+    return current_user
 
 
 @router.post("/register")
