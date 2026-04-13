@@ -20,3 +20,6 @@ class UserRepository:
     @abstractmethod
     def get_by_email(self, user_email: EmailStr) -> User | None:
         pass
+    @abstractmethod
+    def create_user(self, email: EmailStr, password: str, is_admin: bool) -> User:
+        pass
