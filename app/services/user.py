@@ -69,11 +69,13 @@ class UserService:
             return None
 
         if updated_password_hash:
-            user.hashed_password = updated_password_hash
+            user_in = UserUpdate(
+                hashed_password=updated_password_hash,
+            )
 
             self.user_repository.update_user(
                 user,
-                UserUpdate(),
+                user_in,
             )
 
         access_token_expires = timedelta(
