@@ -6,9 +6,9 @@ from models.jwt import Token
 from models.user import UserPublic, UserRegister
 from services.user import UserService
 
-from routers.deps import get_user_service
+from routers.dependencies import get_user_service
 
-from .deps import CurrentUser
+from .dependencies import CurrentUser
 
 router = APIRouter(
     tags=["authentication"],
