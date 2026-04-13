@@ -45,7 +45,7 @@ class UserService:
     ) -> Token | None:
         user = self.get_by_email(email)
 
-        # Timing attach prevention
+        # Timing attack prevention
         if not user:
             security.password_hashing.verify_password(
                 password,
