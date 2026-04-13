@@ -5,7 +5,7 @@ from models.user import User
 from pydantic import EmailStr
 from repositories.user import UserRepository
 from sqlmodel import Session, col, func, select
-
+from security.password_hashing import get_password_hash
 
 class PostgresUserRepository(UserRepository):
     def __init__(
@@ -38,5 +38,21 @@ class PostgresUserRepository(UserRepository):
         with Session(self.engine) as session:
             statement = select(User).where(User.email == user_email)
             user = session.exec(statement).first()
+
+            return user
+        
+    def create_user(self, email: EmailStr, password: str, is_admin: bool) -> User:
+        with Session(self.engine) as session:
+            user = User(
+                email=email,
+                name=None,
+                hashed_password=get_password_hash(password),
+                is_admin=is_admin,
+                is_active=True,
+            )
+
+            session.add(user)
+            session.commit()
+            session.refresh(user)
 
             return user
