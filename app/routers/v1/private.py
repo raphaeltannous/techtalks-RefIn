@@ -2,7 +2,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 from models.user import User, UsersPublic
-from routers.deps import get_user_service
+from routers.dependencies import get_user_service
 from services.user import UserService
 
 router = APIRouter(prefix="/private", tags=["private"])
