@@ -1,6 +1,8 @@
 import uuid
 from datetime import timedelta
 
+from fastapi import BackgroundTasks
+
 import security.jwt_token
 import security.password_hashing
 from config import settings
@@ -99,6 +101,7 @@ class UserService:
         self,
         *,
         user_in: UserRegister,
+        background_tasks: BackgroundTasks,
     ) -> UserPublic | None:
         user_db = self.get_by_email(user_in.email)
         if user_db:
@@ -117,7 +120,8 @@ class UserService:
             user,
         )
 
-        self.mailer.send_html_email(
+        background_tasks.add_task(
+            self.mailer.send_html_email,
             self.mail_template_manager.welcome_email(
                 user=user,
             )
