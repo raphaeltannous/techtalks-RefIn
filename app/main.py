@@ -36,9 +36,9 @@ async def lifespan(app: FastAPI):
     # Logging
     logger = logging.getLogger("uvicorn.error")
 
-    configPath: pathlib.Path = pathlib.Path(__file__)
-    rootProject: pathlib.Path = pathlib.Path(configPath.parent).parent
-    log_directory = rootProject.joinpath("logs")
+    config_path: pathlib.Path = pathlib.Path(__file__)
+    root_project: pathlib.Path = pathlib.Path(config_path.parent).parent
+    log_directory = root_project.joinpath("logs")
     if not log_directory.is_dir():
         log_directory.mkdir()
     log_file = log_directory.joinpath("app.log")
