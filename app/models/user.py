@@ -8,6 +8,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from user_profile import UserProfile
+    from email_verification import EmailVerification
 
 
 class UserBase(SQLModel):
@@ -39,6 +40,11 @@ class User(UserBase, table=True):
 
     user_profile: "UserProfile" = Relationship(
         back_populates="user",
+    )
+
+    email_verifications: list["EmailVerification"] = Relationship(
+    back_populates="user",
+    sa_relationship_kwargs={"cascade": "all, delete"},
     )
 
 
