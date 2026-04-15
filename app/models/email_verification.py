@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class EmailVerificationBase(SQLModel):
-    token_hash: str = Field(nullable=False, index=True)
+    token_hash: str = Field(nullable=False, index=True, unique=True)
 
     expires_at: datetime = Field(
         nullable=False,
@@ -35,11 +35,11 @@ class EmailVerification(EmailVerificationBase, table=True):
     user_id: uuid.UUID = Field(
         index=True,
         nullable=False,
+        unique=True,
         foreign_key="user.id",
         ondelete="CASCADE",
     )
-    # to prevent reuse of same token
-    is_used: bool = Field(default=False)
+  
 
     created_at: datetime | None = Field(
         default_factory=lambda: datetime.now(timezone.utc),
@@ -47,7 +47,7 @@ class EmailVerification(EmailVerificationBase, table=True):
     )
 
     user: "User" = Relationship(
-        back_populates="email_verifications",
+        back_populates="email_verification",
     )
 
 class EmailVerificationUpdate(SQLModel):
@@ -80,21 +80,6 @@ def update_email_verification(
 
     for key, value in update_data.items():
         setattr(db_obj, key, value)
-
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-
-    return db_obj
-
-def mark_token_as_used(
-    session: Session,
-    db_obj: EmailVerification,
-) -> EmailVerification:
-    """
-    Prevent token reuse after successful verification.
-    """
-    db_obj.is_used = True
 
     session.add(db_obj)
     session.commit()
