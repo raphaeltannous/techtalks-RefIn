@@ -56,6 +56,9 @@ async def lifespan(app: FastAPI):
 
     yield
 
+    logger.removeHandler(file_handler)
+    file_handler.close()
+
     postgres_engine.dispose()
 
 
