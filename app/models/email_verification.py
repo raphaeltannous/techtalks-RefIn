@@ -55,34 +55,4 @@ class EmailVerificationUpdate(SQLModel):
     expires_at: datetime | None = None
     is_used: bool | None = None
 
-def get_token_by_hash(
-    session: Session,
-    token_hash: str,
-) -> EmailVerification | None:
-    """
-    Fetch verification record using hashed token.
-    """
-    statement = select(EmailVerification).where(
-        EmailVerification.token_hash == token_hash
-    )
-    return session.exec(statement).first()
 
-
-def update_email_verification(
-    session: Session,
-    db_obj: EmailVerification,
-    obj_in: EmailVerificationUpdate,
-) -> EmailVerification:
-    """
-    Update email verification record.
-    """
-    update_data = obj_in.model_dump(exclude_unset=True)
-
-    for key, value in update_data.items():
-        setattr(db_obj, key, value)
-
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-
-    return db_obj
