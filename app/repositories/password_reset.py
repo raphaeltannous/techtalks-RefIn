@@ -1,3 +1,4 @@
+import uuid
 from abc import ABCMeta, abstractmethod
 
 from models.password_reset import PasswordReset, PasswordResetUpdate
@@ -5,6 +6,10 @@ from models.password_reset import PasswordReset, PasswordResetUpdate
 
 class PasswordResetRepository:
     __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def get_by_user_id(self, user_id: uuid.UUID) -> PasswordReset | None:
+        pass
 
     @abstractmethod
     def get_by_hash(self, hash: str) -> PasswordReset | None:

@@ -1,3 +1,5 @@
+import uuid
+
 from models.password_reset import PasswordReset, PasswordResetUpdate
 from repositories.password_reset import PasswordResetRepository
 from sqlmodel import Session, select
@@ -9,6 +11,16 @@ class PostgresPasswordReset(PasswordResetRepository):
         engine,
     ) -> None:
         self.engine = engine
+
+    def get_by_user_id(self, user_id: uuid.UUID) -> PasswordReset | None:
+        with Session(self.engine) as session:
+            statement = select(PasswordReset).where(
+                PasswordReset.user_id == user_id,
+            )
+
+            password_reset = session.exec(statement).first()
+
+            return password_reset
 
     def get_by_hash(self, hash: str) -> PasswordReset | None:
         with Session(self.engine) as session:
