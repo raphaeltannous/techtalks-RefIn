@@ -63,3 +63,7 @@ class PasswordResetUpdate(SQLModel):
         default=None,
         nullable=True,
     )
+
+
+class PasswordResetRequest(SQLModel):
+    email: EmailStr
