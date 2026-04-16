@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
+    FRONTEND_URL: str = "http://localhost:5173/"
+    FRONTEND_PASSWORD_RESET_URL: str = FRONTEND_URL + "password-reset/"
+
+    PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 10
+
     PROJECT_NAME: str
 
     POSTGRES_SERVER: str
