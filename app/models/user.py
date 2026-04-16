@@ -43,11 +43,6 @@ class User(UserBase, table=True):
         back_populates="user",
     )
 
-    email_verifications: list["EmailVerification"] = Relationship(
-    back_populates="user",
-    sa_relationship_kwargs={"cascade": "all, delete"},
-    )
-
 
 class UserCreate(UserBase):
     password: str = Field(min_length=8, max_length=128)
