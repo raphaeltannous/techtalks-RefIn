@@ -1,19 +1,23 @@
 import logging
+import secrets
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import security.jwt_token
 import security.password_hashing
+from blake3 import blake3
 from config import settings
 from exceptions import DuplicateUserError, InactiveUserError, IncorrectCredentialsError
 from fastapi import BackgroundTasks
 from mail.mailer import Mailer
 from mail.template_manager import EmailTemplateManager
 from models.jwt import Token
+from models.password_reset import PasswordReset, PasswordResetRequest
 from models.user import User, UserPublic, UserRegister, UsersPublic, UserUpdate
 from pydantic import EmailStr
-from repositories.password_reset import PasswordResetRepository
+from repositories.password_reset import PasswordResetRepository, PasswordResetUpdate
 from repositories.user import UserRepository
+from sqlalchemy.orm.events import QueryEvents
 
 
 class UserService:
@@ -132,3 +136,52 @@ class UserService:
         )
 
         return UserPublic.model_validate(user)
+
+    def password_reset_request(
+        self,
+        *,
+        password_reset_request: PasswordResetRequest,
+        background_tasks: BackgroundTasks,
+    ) -> None:
+        user = self.get_by_email(
+            email=password_reset_request.email,
+        )
+
+        if not user:
+            return None
+
+        token = secrets.token_hex(32)
+        expires_at = datetime.now() + timedelta(
+            minutes=settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES,
+        )
+        token_hash = blake3(token.encode("utf-8")).hexdigest()
+
+        password_reset = self.password_reset_repository.get_by_user_id(
+            user_id=user.id,
+        )
+
+        if password_reset:
+            self.password_reset_repository.update(
+                password_reset,
+                PasswordResetUpdate(
+                    hash=token_hash,
+                    expires_at=expires_at,
+                ),
+            )
+        else:
+            password_reset = self.password_reset_repository.add(
+                PasswordReset(
+                    user_id=user.id,
+                    hash=token_hash,
+                    expires_at=expires_at,
+                )
+            )
+
+        background_tasks.add_task(
+            self.mailer.send_html_email,
+            self.mail_template_manager.password_reset_email(
+                user=user,
+                reset_link=settings.FRONTEND_PASSWORD_RESET_URL + token,
+                expiration_minutes=settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES,
+            ),
+        )
