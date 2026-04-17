@@ -154,7 +154,7 @@ class UserService:
             return None
 
         token = secrets.token_hex(32)
-        expires_at = datetime.now() + timedelta(
+        expires_at = datetime.now(timezone.utc) + timedelta(
             minutes=settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES,
         )
         token_hash = blake3(token.encode("utf-8")).hexdigest()
