@@ -41,16 +41,18 @@ class PostgresPasswordReset(PasswordResetRepository):
             return password_reset_in
 
     def update(
-        self, password_reset_db: PasswordReset, password_reset_in: PasswordResetUpdate
+        self,
+        db_obj: PasswordReset,
+        obj_in: PasswordResetUpdate,
     ) -> PasswordReset:
         with Session(self.engine) as session:
-            update_data = password_reset_in.model_dump(
+            update_data = obj_in.model_dump(
                 exclude_unset=True,
             )
 
-            password_reset_db.sqlmodel_update(update_data)
-            session.add(password_reset_db)
+            db_obj.sqlmodel_update(update_data)
+            session.add(db_obj)
             session.commit()
-            session.refresh(password_reset_db)
+            session.refresh(db_obj)
 
-            return password_reset_db
+            return db_obj

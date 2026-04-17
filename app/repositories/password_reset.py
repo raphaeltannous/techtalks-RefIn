@@ -21,6 +21,8 @@ class PasswordResetRepository:
 
     @abstractmethod
     def update(
-        self, password_reset_db: PasswordReset, password_reset_in: PasswordResetUpdate
+        self,
+        db_obj: PasswordReset,
+        obj_in: PasswordResetUpdate,
     ) -> PasswordReset:
         pass
