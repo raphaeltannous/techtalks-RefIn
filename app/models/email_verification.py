@@ -46,13 +46,11 @@ class EmailVerification(EmailVerificationBase, table=True):
         sa_type=DateTime(timezone=True),  # type: ignore
     )
 
-    user: "User" = Relationship(
-        back_populates="email_verification",
-    )
+
 
 class EmailVerificationUpdate(SQLModel):
     token_hash: str | None = None
     expires_at: datetime | None = None
-    is_used: bool | None = None
+  
 
 
