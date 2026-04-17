@@ -1,6 +1,7 @@
-import uuid
 from abc import ABCMeta, abstractmethod
+
 from models.email_verification import EmailVerification, EmailVerificationUpdate
+
 
 class EmailVerificationRepository:
     __metaclass__ = ABCMeta
