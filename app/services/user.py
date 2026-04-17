@@ -2,6 +2,7 @@ import logging
 import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
+from urllib.parse import urljoin
 
 import security.jwt_token
 import security.password_hashing
@@ -184,7 +185,10 @@ class UserService:
             self.mailer.send_html_email,
             self.mail_template_manager.password_reset_email(
                 user=user,
-                reset_link=settings.FRONTEND_PASSWORD_RESET_URL + token,
+                reset_link=urljoin(
+                    settings.FRONTEND_PASSWORD_RESET_URL + "/",
+                    token,
+                ),
                 expiration_minutes=settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES,
             ),
         )
