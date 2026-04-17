@@ -1,7 +1,7 @@
 import logging
 import secrets
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import security.jwt_token
 import security.password_hashing
@@ -167,7 +167,7 @@ class UserService:
             self.password_reset_repository.update(
                 password_reset,
                 PasswordResetUpdate(
-                    hash=token_hash,
+                    token_hash=token_hash,
                     expires_at=expires_at,
                 ),
             )
@@ -175,7 +175,7 @@ class UserService:
             password_reset = self.password_reset_repository.add(
                 PasswordReset(
                     user_id=user.id,
-                    hash=token_hash,
+                    token_hash=token_hash,
                     expires_at=expires_at,
                 )
             )
