@@ -1,5 +1,6 @@
 from config import settings
 from models import (
+    email_verification,  # noqa: F401
     password_reset,  # noqa: F401
     user,  # noqa: F401
     user_certificate,  # noqa: F401
