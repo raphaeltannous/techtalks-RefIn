@@ -12,12 +12,15 @@ from fastapi import BackgroundTasks
 from mail.mailer import Mailer
 from mail.template_manager import EmailTemplateManager
 from models.jwt import Token
-from models.password_reset import PasswordReset, PasswordResetRequest
+from models.password_reset import (
+    PasswordReset,
+    PasswordResetRequest,
+    PasswordResetUpdate,
+)
 from models.user import User, UserPublic, UserRegister, UsersPublic, UserUpdate
 from pydantic import EmailStr
-from repositories.password_reset import PasswordResetRepository, PasswordResetUpdate
+from repositories.password_reset import PasswordResetRepository
 from repositories.user import UserRepository
-from sqlalchemy.orm.events import QueryEvents
 
 
 class UserService:
