@@ -7,7 +7,6 @@ from sqlalchemy import DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from password_reset import PasswordReset
     from user_profile import UserProfile
 
 
