@@ -216,7 +216,7 @@ class UserService:
 
         current_date = datetime.now(timezone.utc)
 
-        if current_date > pr_db_obj.expires_at:
+        if current_date >= pr_db_obj.expires_at:
             raise InvalidPasswordResetToken()
 
         # Valid token
@@ -228,7 +228,7 @@ class UserService:
         )
 
         if not db_user:
-            self.logger.error("User does not exists for a valid token")
+            self.logger.error("User does not exist for a valid token")
             raise InvalidPasswordResetToken()
 
         user_in = UserUpdate(
