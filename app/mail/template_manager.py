@@ -50,6 +50,7 @@ class EmailTemplateManager:
         self,
         user: User,
         verification_link: str,
+        expiration_minutes: int = 10,
     ) -> EmailData:
         return self.__render_template(
             template_name="email_verification.html",
@@ -57,6 +58,7 @@ class EmailTemplateManager:
             subject="Email Verification",
             name=user.name,
             verification_link=verification_link,
+            expiration_minutes=expiration_minutes,
         )
 
     def password_reset_email(

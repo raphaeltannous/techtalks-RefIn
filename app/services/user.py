@@ -145,6 +145,15 @@ class UserService:
             ),
         )
 
+        # TODO: Email verification process
+        background_tasks.add_task(
+            self.mailer.send_html_email,
+            self.mail_template_manager.email_verification_email(
+                user=user,
+                verification_link="todo",
+                expiration_minutes=10,
+            ),
+        )
         return UserPublic.model_validate(user)
 
     def password_reset_request(
