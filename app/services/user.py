@@ -8,7 +8,12 @@ import security.jwt_token
 import security.password_hashing
 from blake3 import blake3
 from config import settings
-from exceptions import DuplicateUserError, InactiveUserError, IncorrectCredentialsError
+from exceptions import (
+    DuplicateUserError,
+    InactiveUserError,
+    IncorrectCredentialsError,
+    InvalidPasswordResetToken,
+)
 from fastapi import BackgroundTasks
 from mail.mailer import Mailer
 from mail.template_manager import EmailTemplateManager
@@ -16,6 +21,7 @@ from models.jwt import Token
 from models.password_reset import (
     PasswordReset,
     PasswordResetRequest,
+    PasswordResetRequestUpdate,
     PasswordResetUpdate,
 )
 from models.user import User, UserPublic, UserRegister, UsersPublic, UserUpdate
@@ -190,5 +196,60 @@ class UserService:
                     token,
                 ),
                 expiration_minutes=settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES,
+            ),
+        )
+
+    def password_reset_request_update(
+        self,
+        *,
+        prru_in: PasswordResetRequestUpdate,
+        background_tasks: BackgroundTasks,
+    ) -> None:
+        token_hash = blake3(prru_in.token.encode("utf-8")).hexdigest()
+
+        pr_db_obj = self.password_reset_repository.get_by_token_hash(
+            token_hash=token_hash,
+        )
+
+        if not pr_db_obj:
+            raise InvalidPasswordResetToken()
+
+        current_date = datetime.now(timezone.utc)
+
+        if current_date > pr_db_obj.expires_at:
+            raise InvalidPasswordResetToken()
+
+        # Valid token
+        password_hash = security.password_hashing.get_password_hash(
+            prru_in.password,
+        )
+        db_user = self.get_by_id(
+            pr_db_obj.user_id,
+        )
+
+        if not db_user:
+            self.logger.error("User does not exists for a valid token")
+            raise InvalidPasswordResetToken()
+
+        user_in = UserUpdate(
+            hashed_password=password_hash,
+        )
+
+        db_user = self.user_repository.update_user(
+            db_user,
+            user_in,
+        )
+
+        self.password_reset_repository.update(
+            db_obj=pr_db_obj,
+            obj_in=PasswordResetUpdate(
+                expires_at=datetime.now(timezone.utc),
+            ),
+        )
+
+        background_tasks.add_task(
+            self.mailer.send_html_email,
+            self.mail_template_manager.password_updated(
+                user=db_user,
             ),
         )
