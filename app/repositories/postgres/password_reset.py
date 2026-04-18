@@ -5,7 +5,7 @@ from repositories.password_reset import PasswordResetRepository
 from sqlmodel import Session, select
 
 
-class PostgresPasswordReset(PasswordResetRepository):
+class PostgresPasswordResetRepository(PasswordResetRepository):
     def __init__(
         self,
         engine,

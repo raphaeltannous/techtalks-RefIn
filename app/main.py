@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from mail.mailer import Mailer
 from mail.smtp import SMTPMailService
 from mail.template_manager import EmailTemplateManager
-from repositories.postgres.password_reset import PostgresPasswordReset
+from repositories.postgres.password_reset import PostgresPasswordResetRepository
 from repositories.postgres.user import PostgresUserRepository
 from routers.main import api_router
 from services.user import UserService
@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
 
     # Initialize Repositories
     user_repository = PostgresUserRepository(postgres_engine)
-    password_reset_repository = PostgresPasswordReset(postgres_engine)
+    password_reset_repository = PostgresPasswordResetRepository(postgres_engine)
 
     # Initialize Services
     app.state.user_service = UserService(
