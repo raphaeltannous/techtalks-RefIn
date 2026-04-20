@@ -13,10 +13,12 @@ from exceptions import (
     InactiveUserError,
     IncorrectCredentialsError,
     InvalidPasswordResetToken,
+    InvalidEmailVerificationToken,
 )
 from fastapi import BackgroundTasks
 from mail.mailer import Mailer
 from mail.template_manager import EmailTemplateManager
+from models.email_verification import EmailVerification, EmailVerificationUpdate
 from models.jwt import Token
 from models.password_reset import (
     PasswordReset,
@@ -26,8 +28,10 @@ from models.password_reset import (
 )
 from models.user import User, UserPublic, UserRegister, UsersPublic, UserUpdate
 from pydantic import EmailStr
+from repositories.email_verification import EmailVerificationRepository
 from repositories.password_reset import PasswordResetRepository
 from repositories.user import UserRepository
+
 
 
 class UserService:
@@ -144,8 +148,11 @@ class UserService:
                 user=user,
             ),
         )
-
-        # TODO: Email verification process
+        background_tasks.add_task(
+            self._send_verification_email,
+            user=user,
+        )
+       
         background_tasks.add_task(
             self.mailer.send_html_email,
             self.mail_template_manager.email_verification_email(
@@ -260,5 +267,97 @@ class UserService:
             self.mailer.send_html_email,
             self.mail_template_manager.password_updated(
                 user=db_user,
+            ),
+        )
+    def _send_verification_email(self, *, user: User) -> None:
+      
+        token = secrets.token_hex(32)
+        expires_at = datetime.now(timezone.utc) + timedelta(
+            minutes=settings.EMAIL_VERIFICATION_TOKEN_EXPIRE_MINUTES,
+        )
+        token_hash = blake3(token.encode("utf-8")).hexdigest()
+
+        email_verification = self.email_verification_repository.get_by_user_id(
+            user_id=user.id,
+        )
+
+        if email_verification:
+            self.email_verification_repository.update(
+                email_verification,
+                EmailVerificationUpdate(
+                    token_hash=token_hash,
+                    expires_at=expires_at,
+                ),
+            )
+        else:
+            self.email_verification_repository.add(
+                EmailVerification(
+                    user_id=user.id,
+                    token_hash=token_hash,
+                    expires_at=expires_at,
+                )
+            )
+
+        self.mailer.send_html_email(
+            self.mail_template_manager.email_verification_email(
+                user=user,
+                verification_link=urljoin(
+                    settings.FRONTEND_EMAIL_VERIFICATION_URL + "/",
+                    token,
+                ),
+                expiration_minutes=settings.EMAIL_VERIFICATION_TOKEN_EXPIRE_MINUTES,
+            ),
+        )
+
+    def email_verification_request(
+        self,
+        *,
+        current_user: User,
+    ) -> None:
+       
+        if current_user.is_verified:
+            return None
+
+        self._send_verification_email(user=current_user)
+
+    def email_verification_confirm(
+        self,
+        *,
+        token: str,
+    ) -> None:
+        """
+        Validate the token and mark the user's email as verified.
+        """
+        token_hash = blake3(token.encode("utf-8")).hexdigest()
+
+        ev_db_obj = self.email_verification_repository.get_by_token_hash(
+            token_hash=token_hash,
+        )
+
+        if not ev_db_obj:
+            raise InvalidEmailVerificationToken()
+
+        current_date = datetime.now(timezone.utc)
+
+        if current_date >= ev_db_obj.expires_at:
+            raise InvalidEmailVerificationToken()
+
+        # Valid token — mark user verified
+        db_user = self.get_by_id(ev_db_obj.user_id)
+
+        if not db_user:
+            self.logger.error("User does not exist for a valid email verification token")
+            raise InvalidEmailVerificationToken()
+
+        self.user_repository.update_user(
+            db_user,
+            UserUpdate(is_verified=True),
+        )
+
+        # Invalidate the token immediately by expiring it
+        self.email_verification_repository.update(
+            db_obj=ev_db_obj,
+            obj_in=EmailVerificationUpdate(
+                expires_at=datetime.now(timezone.utc),
             ),
         )
