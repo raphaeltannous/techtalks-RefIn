@@ -12,7 +12,9 @@ class PostgresEmailVerificationRepository(EmailVerificationRepository):
     ) -> None:
         self.engine = engine
 
-    def get_by_user_id(self, user_id : uuid.UUID,
+    def get_by_user_id(
+        self,
+        user_id: uuid.UUID,
     ) -> EmailVerification | None:
         with Session(self.engine) as session:
             statement = select(EmailVerification).where(
@@ -20,8 +22,8 @@ class PostgresEmailVerificationRepository(EmailVerificationRepository):
             )
             email_verification = session.exec(statement).first()
 
-            return  email_verification
-    
+            return email_verification
+
     def get_by_token_hash(
         self,
         token_hash: str,
