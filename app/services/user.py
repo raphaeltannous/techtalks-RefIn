@@ -67,6 +67,9 @@ class UserService:
     def get_by_id(self, id: uuid.UUID) -> User | None:
         return self.user_repository.get_by_id(id)
 
+    def get_by_username(self, username: str) -> User | None:
+        return self.user_repository.get_by_username(username)
+
     def get_by_email(self, email: EmailStr) -> User | None:
         return self.user_repository.get_by_email(email)
 
