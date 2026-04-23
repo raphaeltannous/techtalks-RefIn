@@ -12,8 +12,8 @@ from exceptions import (
     DuplicateUserError,
     InactiveUserError,
     IncorrectCredentialsError,
-    InvalidPasswordResetToken,
     InvalidEmailVerificationToken,
+    InvalidPasswordResetToken,
 )
 from fastapi import BackgroundTasks
 from mail.mailer import Mailer
@@ -153,6 +153,7 @@ class UserService:
             self.send_verification_email,
             user=user,
         )
+
         return UserPublic.model_validate(user)
 
     def password_reset_request(
@@ -262,8 +263,11 @@ class UserService:
             ),
         )
 
-    def send_verification_email(self, *, user: User) -> None:
-
+    def send_verification_email(
+        self,
+        *,
+        user: User,
+    ) -> None:
         token = secrets.token_hex(32)
         expires_at = datetime.now(timezone.utc) + timedelta(
             minutes=settings.EMAIL_VERIFICATION_TOKEN_EXPIRE_MINUTES,
@@ -321,9 +325,6 @@ class UserService:
         *,
         token: str,
     ) -> None:
-        """
-        Validate the token and mark the user's email as verified.
-        """
         token_hash = blake3(token.encode("utf-8")).hexdigest()
 
         ev_db_obj = self.email_verification_repository.get_by_token_hash(
@@ -338,7 +339,7 @@ class UserService:
         if current_date >= ev_db_obj.expires_at:
             raise InvalidEmailVerificationToken()
 
-        # Valid token — mark user verified
+        # Valid token
         db_user = self.get_by_id(ev_db_obj.user_id)
 
         if not db_user:

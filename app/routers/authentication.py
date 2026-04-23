@@ -2,10 +2,10 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
+from models.email_verification import EmailVerificationConfirm
 from models.jwt import Token
 from models.message import Message
 from models.password_reset import PasswordResetRequest, PasswordResetRequestUpdate
-from models.email_verification import EmailVerificationConfirm
 from models.user import UserPublic, UserRegister
 from services.user import UserService
 
@@ -121,7 +121,9 @@ def email_verification_request(
         background_tasks=background_tasks,
     )
 
-    return Message(message="If your email is unverified, a message has been sent.")
+    return Message(
+        message="If your email is unverified, a message has been sent.",
+    )
 
 
 @router.put(
@@ -137,6 +139,7 @@ def email_verification_confirm(
     user_service.email_verification_confirm(
         token=obj_in.token,
     )
+
     return Message(
         message="Email verified.",
     )
