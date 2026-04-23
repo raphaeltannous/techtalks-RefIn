@@ -33,18 +33,18 @@ from repositories.password_reset import PasswordResetRepository
 from repositories.user import UserRepository
 
 
-
 class UserService:
     def __init__(
         self,
         user_repository: UserRepository,
         password_reset_repository: PasswordResetRepository,
+        email_verification_repository: EmailVerificationRepository,
         mail_template_manager: EmailTemplateManager,
         mailer: Mailer,
     ) -> None:
         self.user_repository = user_repository
         self.password_reset_repository = password_reset_repository
-
+        self.email_verification_repository = email_verification_repository
         self.mail_template_manager = mail_template_manager
         self.mailer = mailer
 
@@ -148,18 +148,10 @@ class UserService:
                 user=user,
             ),
         )
+
         background_tasks.add_task(
-            self._send_verification_email,
+            self.send_verification_email,
             user=user,
-        )
-       
-        background_tasks.add_task(
-            self.mailer.send_html_email,
-            self.mail_template_manager.email_verification_email(
-                user=user,
-                verification_link="todo",
-                expiration_minutes=10,
-            ),
         )
         return UserPublic.model_validate(user)
 
@@ -269,8 +261,9 @@ class UserService:
                 user=db_user,
             ),
         )
-    def _send_verification_email(self, *, user: User) -> None:
-      
+
+    def send_verification_email(self, *, user: User) -> None:
+
         token = secrets.token_hex(32)
         expires_at = datetime.now(timezone.utc) + timedelta(
             minutes=settings.EMAIL_VERIFICATION_TOKEN_EXPIRE_MINUTES,
@@ -313,12 +306,15 @@ class UserService:
         self,
         *,
         current_user: User,
+        background_tasks: BackgroundTasks,
     ) -> None:
-       
         if current_user.is_verified:
             return None
 
-        self._send_verification_email(user=current_user)
+        background_tasks.add_task(
+            self.send_verification_email,
+            user=current_user,
+        )
 
     def email_verification_confirm(
         self,
@@ -346,7 +342,9 @@ class UserService:
         db_user = self.get_by_id(ev_db_obj.user_id)
 
         if not db_user:
-            self.logger.error("User does not exist for a valid email verification token")
+            self.logger.error(
+                "User does not exist for a valid email verification token"
+            )
             raise InvalidEmailVerificationToken()
 
         self.user_repository.update_user(
