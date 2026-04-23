@@ -85,6 +85,7 @@ class Settings(BaseSettings):
             path=self.POSTGRES_DB,
         )
 
+    FIRST_ADMIN_USERNAME: str
     FIRST_ADMIN_EMAIL: EmailStr = "test@example.com"
     FIRST_ADMIN_PASSWORD: str
     FIRST_ADMIN_NAME: str
