@@ -7,6 +7,14 @@ from sqlmodel import Field, SQLModel
 
 
 class UserBase(SQLModel):
+    username: str = Field(
+        unique=True,
+        index=True,
+        nullable=False,
+        min_length=4,
+        max_length=75,
+    )
+
     email: EmailStr = Field(unique=True, index=True, nullable=False, max_length=255)
     name: str | None = Field(default=None, index=True, max_length=75)
     is_active: bool = True
