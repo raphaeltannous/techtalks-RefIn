@@ -35,6 +35,13 @@ class PostgresUserRepository(UserRepository):
         with Session(self.engine) as session:
             return session.get(User, user_id)
 
+    def get_by_username(self, username: str) -> User | None:
+        with Session(self.engine) as session:
+            statement = select(User).where(User.username == username)
+            user = session.exec(statement).first()
+
+            return user
+
     def get_by_email(self, user_email: EmailStr) -> User | None:
         with Session(self.engine) as session:
             statement = select(User).where(User.email == user_email)
