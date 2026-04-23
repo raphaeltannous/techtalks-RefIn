@@ -58,9 +58,10 @@ class UserUpdate(UserBase):
     """
     Admin-only user update model.
 
-    Making email optional from UserBase.
+    Making username and email optional from UserBase.
     """
 
+    username: str | None = Field(default=None, min_length=4, max_lenght=255)  # type: ignore[assignment]
     email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore[assignment]
     hashed_password: str | None = Field(default=None)
 
