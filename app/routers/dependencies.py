@@ -3,6 +3,7 @@ from typing import Annotated
 import jwt
 import security.jwt_token
 from config import settings
+from exceptions import UserProfileNotFoundError
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
@@ -12,8 +13,6 @@ from models.user_profile import UserProfile
 from pydantic import ValidationError
 from services.user import UserService
 from services.user_profile import UserProfileService
-
-from app.exceptions import UserProfileNotFoundError
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
