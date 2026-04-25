@@ -11,10 +11,12 @@ def init(
 
     if count == 0:
         user = User(
+            username=settings.FIRST_ADMIN_USERNAME,
             email=settings.FIRST_ADMIN_EMAIL,
             name=settings.FIRST_ADMIN_NAME,
             is_admin=True,
             is_active=True,
+            is_verified=True,
             hashed_password=security.password_hashing.get_password_hash(
                 settings.FIRST_ADMIN_PASSWORD,
             ),

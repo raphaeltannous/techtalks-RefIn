@@ -67,6 +67,9 @@ class UserService:
     def get_by_id(self, id: uuid.UUID) -> User | None:
         return self.user_repository.get_by_id(id)
 
+    def get_by_username(self, username: str) -> User | None:
+        return self.user_repository.get_by_username(username)
+
     def get_by_email(self, email: EmailStr) -> User | None:
         return self.user_repository.get_by_email(email)
 
@@ -114,7 +117,7 @@ class UserService:
 
         return Token(
             access_token=security.jwt_token.create_access_token(
-                user.id,
+                user.username,
                 expires_delta=access_token_expires,
             )
         )
@@ -126,6 +129,10 @@ class UserService:
         background_tasks: BackgroundTasks,
     ) -> UserPublic:
         user_db = self.get_by_email(user_in.email)
+        if user_db:
+            raise DuplicateUserError()
+
+        user_db = self.get_by_username(user_in.username)
         if user_db:
             raise DuplicateUserError()
 
