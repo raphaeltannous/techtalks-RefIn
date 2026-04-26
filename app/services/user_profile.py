@@ -49,7 +49,7 @@ class UserProfileService:
         self,
         *,
         user_id: uuid.UUID,
-    ) -> UserProfile | None:
+    ) -> UserProfile:
         return self.__get_user_profile_by_user_id(
             user_id=user_id,
         )
@@ -58,11 +58,8 @@ class UserProfileService:
         self,
         *,
         username: str,
-    ) -> UserProfilePublic | None:
+    ) -> UserProfilePublic:
         user = self.__get_user_by_username(username=username)
-
-        if not user:
-            raise UserNotFoundError()
 
         profile = self.get_by_user_id(
             user_id=user.id,

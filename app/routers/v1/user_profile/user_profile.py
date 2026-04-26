@@ -5,7 +5,9 @@ from models.user_profile import UserProfile, UserProfilePublic, UserProfileUpdat
 from routers.dependencies import get_current_user_profile, get_user_profile_service
 from services.user_profile import UserProfileService
 
-router = APIRouter()
+router = APIRouter(
+    tags=["user-profile"],
+)
 
 
 @router.get(
@@ -28,7 +30,7 @@ def get_user_profile(
     "/",
     response_model=UserProfilePublic,
 )
-def update_language(
+def update_profile(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
