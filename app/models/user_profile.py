@@ -46,3 +46,13 @@ class UserProfile(UserProfileBase, table=True):
             "onupdate": lambda: datetime.now(timezone.utc),
         },
     )
+
+
+class UserProfileUpdate(UserProfileBase):
+    pass
+
+
+class UserProfilePublic(UserProfileBase):
+    id: uuid.UUID
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
