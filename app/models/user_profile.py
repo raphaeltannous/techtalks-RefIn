@@ -48,8 +48,10 @@ class UserProfile(UserProfileBase, table=True):
     )
 
 
-class UserProfileUpdate(UserProfileBase):
-    pass
+class UserProfileUpdate(SQLModel):
+    headline: str | None = Field(default=None, max_length=100)
+    about: str | None = Field(default=None, max_length=1_000)
+    location: str | None = Field(default=None, max_length=200)
 
 
 class UserProfilePublic(UserProfileBase):
