@@ -12,6 +12,13 @@ class PostgresUserProfileRepository(UserProfileRepository):
     ) -> None:
         self.engine = engine
 
+    def get_by_id(
+        self,
+        profile_id: uuid.UUID,
+    ) -> UserProfile | None:
+        with Session(self.engine) as session:
+            return session.get(UserProfile, profile_id)
+
     def get_by_user_id(
         self,
         user_id: uuid.UUID,

@@ -8,6 +8,13 @@ class UserProfileRepository:
     __metaclass__ = ABCMeta
 
     @abstractmethod
+    def get_by_id(
+        self,
+        profile_id: uuid.UUID,
+    ) -> UserProfile | None:
+        pass
+
+    @abstractmethod
     def get_by_user_id(
         self,
         user_id: uuid.UUID,
