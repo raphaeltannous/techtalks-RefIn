@@ -46,3 +46,15 @@ class UserProfile(UserProfileBase, table=True):
             "onupdate": lambda: datetime.now(timezone.utc),
         },
     )
+
+
+class UserProfileUpdate(SQLModel):
+    headline: str | None = Field(default=None, max_length=100)
+    about: str | None = Field(default=None, max_length=1_000)
+    location: str | None = Field(default=None, max_length=200)
+
+
+class UserProfilePublic(UserProfileBase):
+    id: uuid.UUID
+    created_at: datetime | None = None
+    updated_at: datetime | None = None

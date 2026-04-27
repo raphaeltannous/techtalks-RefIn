@@ -24,7 +24,7 @@ from models.user_link import (
     UserLinksPublic,
     UserLinkUpdate,
 )
-from models.user_profile import UserProfile
+from models.user_profile import UserProfile, UserProfilePublic, UserProfileUpdate
 from models.user_skill import (
     UserSkill,
     UserSkillIn,
@@ -60,9 +60,39 @@ class UserProfileService:
         self,
         *,
         user_id: uuid.UUID,
-    ) -> UserProfile | None:
-        return self.user_profile_repository.get_by_user_id(
-            user_id,
+    ) -> UserProfile:
+        return self.__get_user_profile_by_user_id(
+            user_id=user_id,
+        )
+
+    def get_by_username(
+        self,
+        *,
+        username: str,
+    ) -> UserProfilePublic:
+        user = self.__get_user_by_username(username=username)
+
+        profile = self.get_by_user_id(
+            user_id=user.id,
+        )
+
+        return UserProfilePublic.model_validate(
+            profile,
+        )
+
+    def update_profile(
+        self,
+        *,
+        user_profile: UserProfile,
+        profile_in: UserProfileUpdate,
+    ) -> UserProfilePublic:
+        profile = self.user_profile_repository.update(
+            profile_db=user_profile,
+            profile_in=profile_in,
+        )
+
+        return UserProfilePublic.model_validate(
+            profile,
         )
 
     def get_all_skills_by_username(
@@ -351,6 +381,19 @@ class UserProfileService:
             raise UserNotFoundError()
 
         return user
+
+    def __get_user_profile_by_id(
+        self,
+        *,
+        profile_id: uuid.UUID,
+    ) -> UserProfile:
+        profile = self.user_profile_repository.get_by_id(
+            profile_id=profile_id,
+        )
+        if not profile:
+            raise UserProfileNotFoundError()
+
+        return profile
 
     def __get_user_profile_by_user_id(
         self,
