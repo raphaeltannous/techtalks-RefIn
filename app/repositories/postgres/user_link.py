@@ -43,7 +43,7 @@ class PostgresUserLinkRepository(UserLinkRepository):
             session.add(link_in)
             session.commit()
             session.refresh(link_in)
-            
+
             return link_in
 
     def update(
