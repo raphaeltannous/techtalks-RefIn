@@ -15,6 +15,7 @@ from repositories.postgres.user import PostgresUserRepository
 from repositories.postgres.user_language import PostgresUserLanguageRepository
 from repositories.postgres.user_link import PostgresUserLinkRepository
 from repositories.postgres.user_profile import PostgresUserProfileRepository
+from repositories.postgres.user_project import PostgresUserProjectRepository
 from repositories.postgres.user_skill import PostgresUserSkillRepository
 from routers.main import api_router
 from services.user import UserService
@@ -37,6 +38,7 @@ async def lifespan(app: FastAPI):
     user_skill_repository = PostgresUserSkillRepository(postgres_engine)
     user_language_repository = PostgresUserLanguageRepository(postgres_engine)
     user_link_repository = PostgresUserLinkRepository(postgres_engine)
+    user_project_repository = PostgresUserProjectRepository(postgres_engine)
 
     # Initialize Services
     app.state.user_service = UserService(
@@ -53,6 +55,7 @@ async def lifespan(app: FastAPI):
         user_profile_repository=user_profile_repository,
         user_language_repository=user_language_repository,
         user_link_repository=user_link_repository,
+        user_project_repository=user_project_repository,
     )
 
     db_data.init(app.state.user_service)
