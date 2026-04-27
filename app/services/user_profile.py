@@ -7,6 +7,7 @@ from exceptions import (
     UserLinkNotFoundError,
     UserNotFoundError,
     UserProfileNotFoundError,
+    UserProjectNotFoundError,
     UserSkillNotFoundError,
 )
 from models.user import User
@@ -25,6 +26,13 @@ from models.user_link import (
     UserLinkUpdate,
 )
 from models.user_profile import UserProfile, UserProfilePublic, UserProfileUpdate
+from models.user_project import (
+    UserProject,
+    UserProjectIn,
+    UserProjectPublic,
+    UserProjectsPublic,
+    UserProjectUpdate,
+)
 from models.user_skill import (
     UserSkill,
     UserSkillIn,
@@ -36,6 +44,7 @@ from repositories.user import UserRepository
 from repositories.user_language import UserLanguageRepository
 from repositories.user_link import UserLinkRepository
 from repositories.user_profile import UserProfileRepository
+from repositories.user_project import UserProjectRepository
 from repositories.user_skill import UserSkillRepository
 
 
@@ -47,12 +56,14 @@ class UserProfileService:
         user_profile_repository: UserProfileRepository,
         user_language_repository: UserLanguageRepository,
         user_link_repository: UserLinkRepository,
+        user_project_repository: UserProjectRepository,
     ) -> None:
         self.user_repository = user_repository
         self.user_skill_repository = user_skill_repository
         self.user_profile_repository = user_profile_repository
         self.user_language_repository = user_language_repository
         self.user_link_repository = user_link_repository
+        self.user_project_repository = user_project_repository
 
         self.logger = logging.getLogger("uvicorn.error")
 
@@ -368,6 +379,97 @@ class UserProfileService:
             link,
         )
 
+    def get_all_projects_by_username(
+        self,
+        *,
+        username: str,
+    ) -> UserProjectsPublic:
+        user = self.__get_user_by_username(
+            username=username,
+        )
+
+        user_profile = self.__get_user_profile_by_user_id(
+            user_id=user.id,
+        )
+
+        projects = self.user_project_repository.get_all_by_user_profile_id(
+            user_profile.id,
+        )
+
+        public_projects = [UserProjectPublic.model_validate(l) for l in projects]
+
+        return UserProjectsPublic(
+            projects=public_projects,
+        )
+
+    def get_project_by_id(
+        self,
+        *,
+        project_id: uuid.UUID,
+    ) -> UserProjectPublic:
+        project = self.__get_project_by_id(project_id=project_id)
+
+        return UserProjectPublic.model_validate(
+            project,
+        )
+
+    def add_project(
+        self,
+        *,
+        user_profile: UserProfile,
+        project_in: UserProjectIn,
+    ) -> UserProjectPublic:
+        project = UserProject.model_validate(
+            project_in,
+            update={
+                "user_profile_id": user_profile.id,
+            },
+        )
+
+        project = self.user_project_repository.add(
+            project,
+        )
+
+        return UserProjectPublic.model_validate(
+            project,
+        )
+
+    def delete_project(
+        self,
+        *,
+        user_profile: UserProfile,
+        project_id: uuid.UUID,
+    ) -> None:
+        project = self.__get_project_by_id(project_id=project_id)
+
+        if project.user_profile_id != user_profile.id:
+            raise ForbiddenAction()
+
+        self.user_project_repository.delete(
+            project_db=project,
+        )
+
+    def update_project(
+        self,
+        *,
+        user_profile: UserProfile,
+        project_id: uuid.UUID,
+        project_in: UserProjectUpdate,
+    ) -> UserProjectPublic:
+        project = self.__get_project_by_id(project_id=project_id)
+
+        if project.user_profile_id != user_profile.id:
+            raise ForbiddenAction()
+
+        project = self.user_project_repository.update(
+            project_db=project,
+            project_in=project_in,
+        )
+
+        return UserProjectPublic.model_validate(
+            project,
+        )
+
     # Private helper functions
     def __get_user_by_username(
         self,
@@ -446,3 +548,16 @@ class UserProfileService:
             raise UserLinkNotFoundError()
 
         return link
+
+    def __get_project_by_id(
+        self,
+        *,
+        project_id: uuid.UUID,
+    ) -> UserProject:
+        project = self.user_project_repository.get_by_id(
+            project_id,
+        )
+        if not project:
+            raise UserProjectNotFoundError()
+
+        return project
