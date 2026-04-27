@@ -2,6 +2,7 @@ import pathlib
 import secrets
 import warnings
 from typing import Literal
+from urllib.parse import urljoin
 
 from pydantic import (
     EmailStr,
@@ -30,7 +31,7 @@ class Settings(BaseSettings):
     )
 
     # TODO: Update to API_VERSION_1_STRING
-    API_VERSION_STRING: str = "/api/v1"
+    API_VERSION_1_STRING: str = "/api/v1"
 
     SECRET_KEY: str = secrets.token_urlsafe(nbytes=32)
 
@@ -40,6 +41,29 @@ class Settings(BaseSettings):
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
+
+    FRONTEND_URL: str = "http://localhost:5173/"
+    FRONTEND_PASSWORD_RESET_PATH: str = "/password-reset"
+
+    @computed_field
+    @property
+    def FRONTEND_PASSWORD_RESET_URL(self) -> str:
+        return urljoin(
+            self.FRONTEND_URL.rstrip("/") + "/", self.FRONTEND_PASSWORD_RESET_PATH
+        )
+
+    PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 10
+
+    FRONTEND_EMAIL_VERIFICATION_PATH: str = "/email-verification"
+
+    @computed_field
+    @property
+    def FRONTEND_EMAIL_VERIFICATION_URL(self) -> str:
+        return urljoin(
+            self.FRONTEND_URL.rstrip("/") + "/", self.FRONTEND_EMAIL_VERIFICATION_PATH
+        )
+
+    EMAIL_VERIFICATION_TOKEN_EXPIRE_MINUTES: int = 10
 
     PROJECT_NAME: str
 
@@ -61,8 +85,10 @@ class Settings(BaseSettings):
             path=self.POSTGRES_DB,
         )
 
+    FIRST_ADMIN_USERNAME: str
     FIRST_ADMIN_EMAIL: EmailStr = "test@example.com"
     FIRST_ADMIN_PASSWORD: str
+    FIRST_ADMIN_NAME: str
 
     # SMTP Configuration for email sending
     SMTP_SERVER: str = "localhost"

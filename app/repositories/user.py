@@ -18,6 +18,10 @@ class UserRepository:
         pass
 
     @abstractmethod
+    def get_by_username(self, username: str) -> User | None:
+        pass
+
+    @abstractmethod
     def get_by_email(self, user_email: EmailStr) -> User | None:
         pass
 
@@ -26,5 +30,5 @@ class UserRepository:
         pass
 
     @abstractmethod
-    def update_user(self, user_db: User, user_in: UserUpdate) -> User | None:
+    def update_user(self, user_db: User, user_in: UserUpdate) -> User:
         pass

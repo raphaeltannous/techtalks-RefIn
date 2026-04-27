@@ -7,15 +7,20 @@ from sqlalchemy.orm import declared_attr
 from sqlmodel import Field, SQLModel
 
 
-class UserProfileBase(SQLModel):
-    headline: str | None = Field(default=None, max_length=100)
-    about: str | None = Field(default=None, max_length=1_000)
-    location: str | None = Field(default=None, max_length=200)
-    profile_picture: str | None = Field(default=None)
-    banner: str | None = Field(default=None)
+class EmailVerificationBase(SQLModel):
+    token_hash: str = Field(
+        nullable=False,
+        index=True,
+        unique=True,
+    )
+
+    expires_at: datetime = Field(
+        nullable=False,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
 
 
-class UserProfile(UserProfileBase, table=True):
+class EmailVerification(EmailVerificationBase, table=True):
     @declared_attr.directive  # type: ignore[misc]
     @classmethod
     def __tablename__(cls) -> str:  # pyright: ignore[reportIncompatibleVariableOverride]
@@ -23,26 +28,34 @@ class UserProfile(UserProfileBase, table=True):
 
     id: uuid.UUID = Field(
         default_factory=uuid.uuid4,
-        unique=True,
         index=True,
         primary_key=True,
     )
+
     user_id: uuid.UUID = Field(
         index=True,
-        unique=True,
         nullable=False,
+        unique=True,
         foreign_key="user.id",
         ondelete="CASCADE",
     )
 
     created_at: datetime | None = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        sa_type=DateTime(timezone=True),  #  type: ignore
+        sa_type=DateTime(timezone=True),  # type: ignore
     )
-    updated_at: datetime | None = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        sa_type=DateTime(timezone=True),  #  type: ignore
-        sa_column_kwargs={
-            "onupdate": lambda: datetime.now(timezone.utc),
-        },
+
+
+class EmailVerificationUpdate(SQLModel):
+    token_hash: str | None = Field(
+        default=None,
+        nullable=True,
     )
+    expires_at: datetime | None = Field(
+        default=None,
+        nullable=True,
+    )
+
+
+class EmailVerificationConfirm(SQLModel):
+    token: str = Field(nullable=False)

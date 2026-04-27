@@ -1,15 +1,11 @@
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
-from typing import TYPE_CHECKING
 
 from pydantic.alias_generators import to_snake
 from sqlalchemy import DateTime
 from sqlalchemy.orm import declared_attr
-from sqlmodel import Field, Relationship, SQLModel
-
-if TYPE_CHECKING:
-    from user_profile import UserProfile
+from sqlmodel import Field, SQLModel
 
 
 class ProficiencyLevel(str, Enum):
@@ -55,6 +51,20 @@ class UserLanguage(UserLanguageBase, table=True):
         },
     )
 
-    user_profile: "UserProfile" = Relationship(
-        back_populates="user_languages",
-    )
+
+class UserLanguageIn(UserLanguageBase):
+    pass
+
+
+class UserLanguageUpdate(UserLanguageBase):
+    pass
+
+
+class UserLanguagePublic(UserLanguageBase):
+    id: uuid.UUID
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class UserLanguagesPublic(SQLModel):
+    languages: list[UserLanguagePublic]

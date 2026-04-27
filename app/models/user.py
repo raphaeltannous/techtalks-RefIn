@@ -1,20 +1,24 @@
 import uuid
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
 
 from pydantic import EmailStr
 from sqlalchemy import DateTime
-from sqlmodel import Field, Relationship, SQLModel
-
-if TYPE_CHECKING:
-    from user_profile import UserProfile
+from sqlmodel import Field, SQLModel
 
 
 class UserBase(SQLModel):
-    email: EmailStr = Field(unique=True, index=True, nullable=False, max_length=255)
+    username: str = Field(
+        unique=True,
+        index=True,
+        nullable=False,
+        min_length=4,
+        max_length=75,
+    )
+
     name: str | None = Field(default=None, index=True, max_length=75)
     is_active: bool = True
     is_admin: bool = False
+    is_verified: bool = Field(default=False)
 
 
 class User(UserBase, table=True):
@@ -24,7 +28,10 @@ class User(UserBase, table=True):
         primary_key=True,
     )
 
+    email: EmailStr = Field(unique=True, index=True, nullable=False, max_length=255)
+
     hashed_password: str
+
     created_at: datetime | None = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         sa_type=DateTime(timezone=True),  # type: ignore
@@ -37,16 +44,14 @@ class User(UserBase, table=True):
         },
     )
 
-    user_profile: "UserProfile" = Relationship(
-        back_populates="user",
-    )
-
 
 class UserCreate(UserBase):
+    email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=128)
 
 
 class UserRegister(SQLModel):
+    username: str = Field(min_length=4, max_length=75)
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=128)
     name: str | None = Field(default=None, max_length=75)
@@ -56,10 +61,11 @@ class UserUpdate(UserBase):
     """
     Admin-only user update model.
 
-    Making email optional from UserBase.
+    Making username and email optional from UserBase.
     """
 
-    email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore[assignment]
+    username: str | None = Field(default=None, min_length=4, max_length=75)  # type: ignore[assignment]
+    email: EmailStr | None = Field(default=None, max_length=255)
     hashed_password: str | None = Field(default=None)
 
 
@@ -78,7 +84,6 @@ class UserPublic(UserBase):
     UserPublic returned to the public as json.
     """
 
-    id: uuid.UUID
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

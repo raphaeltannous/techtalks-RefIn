@@ -1,17 +1,14 @@
 import uuid
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
 
 from pydantic.alias_generators import to_snake
 from sqlalchemy import DateTime
 from sqlalchemy.orm import declared_attr
-from sqlmodel import Field, Relationship, SQLModel
-
-if TYPE_CHECKING:
-    from user_profile import UserProfile
+from sqlmodel import Field, SQLModel
 
 
 class UserSkillBase(SQLModel):
+    # TODO: add min_length=2
     skill: str = Field(max_length=50)
 
 
@@ -45,6 +42,20 @@ class UserSkill(UserSkillBase, table=True):
         },
     )
 
-    user_profile: "UserProfile" = Relationship(
-        back_populates="user_skills",
-    )
+
+class UserSkillIn(UserSkillBase):
+    pass
+
+
+class UserSkillUpdate(UserSkillBase):
+    pass
+
+
+class UserSkillPublic(UserSkillBase):
+    id: uuid.UUID
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class UserSkillsPublic(SQLModel):
+    skills: list[UserSkillPublic]
