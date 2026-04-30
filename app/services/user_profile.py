@@ -3,6 +3,7 @@ import uuid
 
 from exceptions import (
     ForbiddenAction,
+    UserEducationNotFoundError,
     UserExperienceNotFoundError,
     UserLanguageNotFoundError,
     UserLinkNotFoundError,
@@ -12,6 +13,13 @@ from exceptions import (
     UserSkillNotFoundError,
 )
 from models.user import User
+from models.user_education import (
+    UserEducation,
+    UserEducationIn,
+    UserEducationPublic,
+    UserEducationsPublic,
+    UserEducationUpdate,
+)
 from models.user_experience import (
     UserExperience,
     UserExperienceIn,
@@ -49,6 +57,7 @@ from models.user_skill import (
     UserSkillUpdate,
 )
 from repositories.user import UserRepository
+from repositories.user_education import UserEducationRepository
 from repositories.user_experience import UserExperienceRepository
 from repositories.user_language import UserLanguageRepository
 from repositories.user_link import UserLinkRepository
@@ -67,6 +76,7 @@ class UserProfileService:
         user_link_repository: UserLinkRepository,
         user_experience_repository: UserExperienceRepository,
         user_project_repository: UserProjectRepository,
+        user_education_repository: UserEducationRepository,
     ) -> None:
         self.user_repository = user_repository
         self.user_skill_repository = user_skill_repository
@@ -75,6 +85,7 @@ class UserProfileService:
         self.user_link_repository = user_link_repository
         self.user_experience_repository = user_experience_repository
         self.user_project_repository = user_project_repository
+        self.user_education_repository = user_education_repository
 
         self.logger = logging.getLogger("uvicorn.error")
 
@@ -571,6 +582,97 @@ class UserProfileService:
             experience,
         )
 
+    def get_all_educations_by_username(
+        self,
+        *,
+        username: str,
+    ) -> UserEducationsPublic:
+        user = self.__get_user_by_username(
+            username=username,
+        )
+
+        user_profile = self.__get_user_profile_by_user_id(
+            user_id=user.id,
+        )
+
+        educations = self.user_education_repository.get_all_by_user_profile_id(
+            user_profile.id,
+        )
+
+        public_educations = [UserEducationPublic.model_validate(l) for l in educations]
+
+        return UserEducationsPublic(
+            educations=public_educations,
+        )
+
+    def get_education_by_id(
+        self,
+        *,
+        education_id: uuid.UUID,
+    ) -> UserEducationPublic:
+        education = self.__get_education_by_id(education_id=education_id)
+
+        return UserEducationPublic.model_validate(
+            education,
+        )
+
+    def add_education(
+        self,
+        *,
+        user_profile: UserProfile,
+        education_in: UserEducationIn,
+    ) -> UserEducationPublic:
+        education = UserEducation.model_validate(
+            education_in,
+            update={
+                "user_profile_id": user_profile.id,
+            },
+        )
+
+        education = self.user_education_repository.add(
+            education,
+        )
+
+        return UserEducationPublic.model_validate(
+            education,
+        )
+
+    def delete_education(
+        self,
+        *,
+        user_profile: UserProfile,
+        education_id: uuid.UUID,
+    ) -> None:
+        education = self.__get_education_by_id(education_id=education_id)
+
+        if education.user_profile_id != user_profile.id:
+            raise ForbiddenAction()
+
+        self.user_education_repository.delete(
+            education_db=education,
+        )
+
+    def update_education(
+        self,
+        *,
+        user_profile: UserProfile,
+        education_id: uuid.UUID,
+        education_in: UserEducationUpdate,
+    ) -> UserEducationPublic:
+        education = self.__get_education_by_id(education_id=education_id)
+
+        if education.user_profile_id != user_profile.id:
+            raise ForbiddenAction()
+
+        education = self.user_education_repository.update(
+            education_db=education,
+            education_in=education_in,
+        )
+
+        return UserEducationPublic.model_validate(
+            education,
+        )
+
     # Private helper functions
     def __get_user_by_username(
         self,
@@ -649,6 +751,19 @@ class UserProfileService:
             raise UserLinkNotFoundError()
 
         return link
+
+    def __get_education_by_id(
+        self,
+        *,
+        education_id: uuid.UUID,
+    ) -> UserEducation:
+        education = self.user_education_repository.get_by_id(
+            education_id,
+        )
+        if not education:
+            raise UserEducationNotFoundError()
+
+        return education
 
     def __get_project_by_id(
         self,
