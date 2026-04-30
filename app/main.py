@@ -12,7 +12,7 @@ from mail.template_manager import EmailTemplateManager
 from repositories.postgres.email_verification import PostgresEmailVerificationRepository
 from repositories.postgres.password_reset import PostgresPasswordResetRepository
 from repositories.postgres.user import PostgresUserRepository
-from repositories.postgres.user_educatin import PostgresUserEducationRepository
+from repositories.postgres.user_education import PostgresUserEducationRepository
 from repositories.postgres.user_experience import PostgresUserExperienceRepository
 from repositories.postgres.user_language import PostgresUserLanguageRepository
 from repositories.postgres.user_link import PostgresUserLinkRepository
