@@ -53,3 +53,21 @@ class UserCertificate(UserCertificateBase, table=True):
             "onupdate": lambda: datetime.now(timezone.utc),
         },
     )
+
+
+class UserCertificateIn(UserCertificateBase):
+    pass
+
+
+class UserCertificateUpdate(UserCertificateBase):
+    pass
+
+
+class UserCertificatePublic(UserCertificateBase):
+    id: uuid.UUID
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class UserCertificatesPublic(SQLModel):
+    certificates: list[UserCertificatePublic]
