@@ -4,6 +4,7 @@ import uuid
 from exceptions import (
     ForbiddenAction,
     UserEducationNotFoundError,
+    UserCertificateNotFoundError,
     UserExperienceNotFoundError,
     UserLanguageNotFoundError,
     UserLinkNotFoundError,
@@ -19,6 +20,12 @@ from models.user_education import (
     UserEducationPublic,
     UserEducationsPublic,
     UserEducationUpdate,
+from models.user_certificate import (
+    UserCertificate,
+    UserCertificateIn,
+    UserCertificatePublic,
+    UserCertificatesPublic,
+    UserCertificateUpdate,
 )
 from models.user_experience import (
     UserExperience,
@@ -58,6 +65,7 @@ from models.user_skill import (
 )
 from repositories.user import UserRepository
 from repositories.user_education import UserEducationRepository
+from repositories.user_certificate import UserCertificateRepository
 from repositories.user_experience import UserExperienceRepository
 from repositories.user_language import UserLanguageRepository
 from repositories.user_link import UserLinkRepository
@@ -77,6 +85,7 @@ class UserProfileService:
         user_experience_repository: UserExperienceRepository,
         user_project_repository: UserProjectRepository,
         user_education_repository: UserEducationRepository,
+        user_certificate_repository: UserCertificateRepository,
     ) -> None:
         self.user_repository = user_repository
         self.user_skill_repository = user_skill_repository
@@ -86,6 +95,7 @@ class UserProfileService:
         self.user_experience_repository = user_experience_repository
         self.user_project_repository = user_project_repository
         self.user_education_repository = user_education_repository
+        self.user_certificate_repository = user_certificate_repository
 
         self.logger = logging.getLogger("uvicorn.error")
 
@@ -492,6 +502,99 @@ class UserProfileService:
             project,
         )
 
+    def get_all_certificates_by_username(
+        self,
+        *,
+        username: str,
+    ) -> UserCertificatesPublic:
+        user = self.__get_user_by_username(
+            username=username,
+        )
+
+        user_profile = self.__get_user_profile_by_user_id(
+            user_id=user.id,
+        )
+
+        certificates = self.user_certificate_repository.get_all_by_user_profile_id(
+            user_profile.id,
+        )
+
+        public_certificates = [
+            UserCertificatePublic.model_validate(l) for l in certificates
+        ]
+
+        return UserCertificatesPublic(
+            certificates=public_certificates,
+        )
+
+    def get_certificate_by_id(
+        self,
+        *,
+        certificate_id: uuid.UUID,
+    ) -> UserCertificatePublic:
+        certificate = self.__get_certificate_by_id(certificate_id=certificate_id)
+
+        return UserCertificatePublic.model_validate(
+            certificate,
+        )
+
+    def add_certificate(
+        self,
+        *,
+        user_profile: UserProfile,
+        certificate_in: UserCertificateIn,
+    ) -> UserCertificatePublic:
+        certificate = UserCertificate.model_validate(
+            certificate_in,
+            update={
+                "user_profile_id": user_profile.id,
+            },
+        )
+
+        certificate = self.user_certificate_repository.add(
+            certificate,
+        )
+
+        return UserCertificatePublic.model_validate(
+            certificate,
+        )
+
+    def delete_certificate(
+        self,
+        *,
+        user_profile: UserProfile,
+        certificate_id: uuid.UUID,
+    ) -> None:
+        certificate = self.__get_certificate_by_id(certificate_id=certificate_id)
+
+        if certificate.user_profile_id != user_profile.id:
+            raise ForbiddenAction()
+
+        self.user_certificate_repository.delete(
+            certificate_db=certificate,
+        )
+
+    def update_certificate(
+        self,
+        *,
+        user_profile: UserProfile,
+        certificate_id: uuid.UUID,
+        certificate_in: UserCertificateUpdate,
+    ) -> UserCertificatePublic:
+        certificate = self.__get_certificate_by_id(certificate_id=certificate_id)
+
+        if certificate.user_profile_id != user_profile.id:
+            raise ForbiddenAction()
+
+        certificate = self.user_certificate_repository.update(
+            certificate_db=certificate,
+            certificate_in=certificate_in,
+        )
+
+        return UserCertificatePublic.model_validate(
+            certificate,
+        )
+
     def get_all_experiences_by_username(
         self,
         *,
@@ -777,6 +880,19 @@ class UserProfileService:
             raise UserProjectNotFoundError()
 
         return project
+
+    def __get_certificate_by_id(
+        self,
+        *,
+        certificate_id: uuid.UUID,
+    ) -> UserCertificate:
+        certificate = self.user_certificate_repository.get_by_id(
+            certificate_id,
+        )
+        if not certificate:
+            raise UserCertificateNotFoundError()
+
+        return certificate
 
     def __get_experience_by_id(
         self,
