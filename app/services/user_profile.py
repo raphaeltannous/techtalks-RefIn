@@ -3,8 +3,8 @@ import uuid
 
 from exceptions import (
     ForbiddenAction,
-    UserEducationNotFoundError,
     UserCertificateNotFoundError,
+    UserEducationNotFoundError,
     UserExperienceNotFoundError,
     UserLanguageNotFoundError,
     UserLinkNotFoundError,
@@ -14,18 +14,19 @@ from exceptions import (
     UserSkillNotFoundError,
 )
 from models.user import User
-from models.user_education import (
-    UserEducation,
-    UserEducationIn,
-    UserEducationPublic,
-    UserEducationsPublic,
-    UserEducationUpdate,
 from models.user_certificate import (
     UserCertificate,
     UserCertificateIn,
     UserCertificatePublic,
     UserCertificatesPublic,
     UserCertificateUpdate,
+)
+from models.user_education import (
+    UserEducation,
+    UserEducationIn,
+    UserEducationPublic,
+    UserEducationsPublic,
+    UserEducationUpdate,
 )
 from models.user_experience import (
     UserExperience,
@@ -64,8 +65,8 @@ from models.user_skill import (
     UserSkillUpdate,
 )
 from repositories.user import UserRepository
-from repositories.user_education import UserEducationRepository
 from repositories.user_certificate import UserCertificateRepository
+from repositories.user_education import UserEducationRepository
 from repositories.user_experience import UserExperienceRepository
 from repositories.user_language import UserLanguageRepository
 from repositories.user_link import UserLinkRepository
@@ -246,7 +247,9 @@ class UserProfileService:
             user_profile.id,
         )
 
-        public_languages = [UserLanguagePublic.model_validate(l) for l in languages]
+        public_languages = [
+            UserLanguagePublic.model_validate(language) for language in languages
+        ]
 
         return UserLanguagesPublic(
             languages=public_languages,
@@ -337,7 +340,7 @@ class UserProfileService:
             user_profile.id,
         )
 
-        public_links = [UserLinkPublic.model_validate(l) for l in links]
+        public_links = [UserLinkPublic.model_validate(link) for link in links]
 
         return UserLinksPublic(
             links=public_links,
@@ -428,7 +431,9 @@ class UserProfileService:
             user_profile.id,
         )
 
-        public_projects = [UserProjectPublic.model_validate(l) for l in projects]
+        public_projects = [
+            UserProjectPublic.model_validate(project) for project in projects
+        ]
 
         return UserProjectsPublic(
             projects=public_projects,
@@ -520,7 +525,8 @@ class UserProfileService:
         )
 
         public_certificates = [
-            UserCertificatePublic.model_validate(l) for l in certificates
+            UserCertificatePublic.model_validate(certificate)
+            for certificate in certificates
         ]
 
         return UserCertificatesPublic(
@@ -610,7 +616,8 @@ class UserProfileService:
             user_profile.id,
         )
         public_experiences = [
-            UserExperiencePublic.model_validate(l) for l in experiences
+            UserExperiencePublic.model_validate(experience)
+            for experience in experiences
         ]
 
         return UserExperiencesPublic(
@@ -702,7 +709,9 @@ class UserProfileService:
             user_profile.id,
         )
 
-        public_educations = [UserEducationPublic.model_validate(l) for l in educations]
+        public_educations = [
+            UserEducationPublic.model_validate(education) for education in educations
+        ]
 
         return UserEducationsPublic(
             educations=public_educations,
