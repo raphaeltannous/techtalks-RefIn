@@ -492,7 +492,6 @@ class UserProfileService:
             project,
         )
 
-
     def get_all_certificates_by_username(
         self,
         *,
@@ -549,6 +548,7 @@ class UserProfileService:
         return UserCertificatePublic.model_validate(
             certificate,
         )
+
     def delete_certificate(
         self,
         *,
@@ -584,7 +584,7 @@ class UserProfileService:
         return UserCertificatePublic.model_validate(
             certificate,
         )
-      
+
     def get_all_experiences_by_username(
         self,
         *,
@@ -779,7 +779,7 @@ class UserProfileService:
             raise UserCertificateNotFoundError()
 
         return certificate
-          
+
     def __get_experience_by_id(
         self,
         *,
