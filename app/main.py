@@ -12,6 +12,7 @@ from mail.template_manager import EmailTemplateManager
 from repositories.postgres.email_verification import PostgresEmailVerificationRepository
 from repositories.postgres.password_reset import PostgresPasswordResetRepository
 from repositories.postgres.user import PostgresUserRepository
+from repositories.postgres.user_certificate import PostgresUserCertificateRepository
 from repositories.postgres.user_experience import PostgresUserExperienceRepository
 from repositories.postgres.user_language import PostgresUserLanguageRepository
 from repositories.postgres.user_link import PostgresUserLinkRepository
@@ -40,6 +41,7 @@ async def lifespan(app: FastAPI):
     user_language_repository = PostgresUserLanguageRepository(postgres_engine)
     user_link_repository = PostgresUserLinkRepository(postgres_engine)
     user_project_repository = PostgresUserProjectRepository(postgres_engine)
+    user_certificate_repository = PostgresUserCertificateRepository(postgres_engine)
     user_experience_repository = PostgresUserExperienceRepository(postgres_engine)
 
     # Initialize Services
@@ -51,6 +53,7 @@ async def lifespan(app: FastAPI):
         mailer=mailer,
     )
 
+
     app.state.user_profile_service = UserProfileService(
         user_repository=user_repository,
         user_skill_repository=user_skill_repository,
@@ -58,6 +61,7 @@ async def lifespan(app: FastAPI):
         user_language_repository=user_language_repository,
         user_link_repository=user_link_repository,
         user_project_repository=user_project_repository,
+        user_certificate_repository=user_certificate_repository,
         user_experience_repository=user_experience_repository,
     )
 
