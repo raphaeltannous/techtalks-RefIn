@@ -46,3 +46,21 @@ class UserEducation(UserEducationBase, table=True):
             "onupdate": lambda: datetime.now(timezone.utc),
         },
     )
+
+
+class UserEducationIn(UserEducationBase):
+    pass
+
+
+class UserEducationUpdate(UserEducationBase):
+    pass
+
+
+class UserEducationPublic(UserEducationBase):
+    id: uuid.UUID
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class UserEducationsPublic(SQLModel):
+    educations: list[UserEducationPublic]
