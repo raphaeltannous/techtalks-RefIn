@@ -1,6 +1,7 @@
 import uuid
 from typing import Sequence
 
+from exceptions import UserLinkNotFoundError
 from models.user_link import UserLink, UserLinkUpdate
 from repositories.user_link import UserLinkRepository
 from sqlmodel import Session, col, select
@@ -31,9 +32,14 @@ class PostgresUserLinkRepository(UserLinkRepository):
     def get_by_id(
         self,
         link_id: uuid.UUID,
-    ) -> UserLink | None:
+    ) -> UserLink:
         with Session(self.engine) as session:
-            return session.get(UserLink, link_id)
+            link = session.get(UserLink, link_id)
+
+            if link is None:
+                raise UserLinkNotFoundError()
+
+            return link
 
     def add(
         self,
