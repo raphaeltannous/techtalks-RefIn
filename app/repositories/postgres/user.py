@@ -1,6 +1,7 @@
 import uuid
 from typing import Sequence
 
+from exceptions import UserNotFoundError
 from models.user import User, UserUpdate
 from models.user_profile import UserProfile
 from pydantic import EmailStr
@@ -15,7 +16,11 @@ class PostgresUserRepository(UserRepository):
     ) -> None:
         self.engine = engine
 
-    def get_users(self, offset: int, limit: int) -> tuple[Sequence[User], int]:
+    def get_users(
+        self,
+        offset: int,
+        limit: int,
+    ) -> tuple[Sequence[User], int]:
         with Session(self.engine) as session:
             count_statement = select(func.count()).select_from(User)
             count = session.exec(count_statement).one()
@@ -31,25 +36,48 @@ class PostgresUserRepository(UserRepository):
 
             return users, count
 
-    def get_by_id(self, user_id: uuid.UUID) -> User | None:
+    def get_by_id(
+        self,
+        user_id: uuid.UUID,
+    ) -> User:
         with Session(self.engine) as session:
-            return session.get(User, user_id)
+            user = session.get(User, user_id)
 
-    def get_by_username(self, username: str) -> User | None:
+            if user is None:
+                raise UserNotFoundError()
+
+            return user
+
+    def get_by_username(
+        self,
+        username: str,
+    ) -> User:
         with Session(self.engine) as session:
             statement = select(User).where(User.username == username)
             user = session.exec(statement).first()
 
+            if user is None:
+                raise UserNotFoundError()
+
             return user
 
-    def get_by_email(self, user_email: EmailStr) -> User | None:
+    def get_by_email(
+        self,
+        user_email: EmailStr,
+    ) -> User:
         with Session(self.engine) as session:
             statement = select(User).where(User.email == user_email)
             user = session.exec(statement).first()
 
+            if user is None:
+                raise UserNotFoundError()
+
             return user
 
-    def add_user(self, user_in: User) -> User:
+    def add_user(
+        self,
+        user_in: User,
+    ) -> User:
         with Session(self.engine) as session:
             session.add(user_in)
             session.flush()
@@ -62,7 +90,11 @@ class PostgresUserRepository(UserRepository):
 
             return user_in
 
-    def update_user(self, user_db: User, user_in: UserUpdate) -> User:
+    def update_user(
+        self,
+        user_db: User,
+        user_in: UserUpdate,
+    ) -> User:
         with Session(self.engine) as session:
             update_data = user_in.model_dump(
                 exclude_unset=True,
