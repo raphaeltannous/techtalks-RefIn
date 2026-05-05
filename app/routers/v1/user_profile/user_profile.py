@@ -1,8 +1,9 @@
 from typing import Annotated, Any
 
 from config import settings
-from exceptions import UserProfileUploadSizeExceededError
+from exceptions import UserProfilePictureNotFound, UserProfileUploadSizeExceededError
 from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi.responses import FileResponse
 from models.user_profile import UserProfile, UserProfilePublic, UserProfileUpdate
 from routers.dependencies import get_current_user_profile, get_user_profile_service
 from services.user_profile import UserProfileService
@@ -56,7 +57,7 @@ async def upload_profile_picture(
     ],
     user_profile: Annotated[UserProfile, Depends(get_current_user_profile)],
     file: UploadFile = File(...),
-):
+) -> Any:
     contents = await file.read()
 
     if len(contents) > settings.MAX_USER_PROFILE_UPLOAD_SIZE_BYTES:
@@ -66,3 +67,18 @@ async def upload_profile_picture(
         user_profile=user_profile,
         image_bytes=contents,
     )
+
+
+@router.get(
+    "/profile-picture/{filename}",
+    response_class=FileResponse,
+)
+async def get_profile_picture(
+    filename: str,
+) -> Any:
+    file_path = settings.USER_PROFILE_PICTURES_DIRECTORY.joinpath(filename).absolute()
+
+    if not file_path.exists():
+        raise UserProfilePictureNotFound()
+
+    return file_path
