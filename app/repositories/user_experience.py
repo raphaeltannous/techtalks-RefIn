@@ -19,7 +19,10 @@ class UserExperienceRepository:
     def get_by_id(
         self,
         experience_id: uuid.UUID,
-    ) -> UserExperience | None:
+    ) -> UserExperience:
+        """
+        Will raise UserExperienceNotFoundError() when not found.
+        """
         pass
 
     @abstractmethod
