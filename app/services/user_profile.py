@@ -1,8 +1,11 @@
 import logging
 import uuid
+from io import BytesIO
 
+from config import settings
 from exceptions import (
     ForbiddenAction,
+    InvalidImageError,
     UserCertificateNotFoundError,
     UserEducationNotFoundError,
     UserExperienceNotFoundError,
@@ -13,6 +16,7 @@ from exceptions import (
     UserProjectNotFoundError,
     UserSkillNotFoundError,
 )
+from fastapi import File, UploadFile
 from models.user import User
 from models.user_certificate import (
     UserCertificate,
@@ -64,6 +68,7 @@ from models.user_skill import (
     UserSkillsPublic,
     UserSkillUpdate,
 )
+from PIL import Image, ImageOps
 from repositories.user import UserRepository
 from repositories.user_certificate import UserCertificateRepository
 from repositories.user_education import UserEducationRepository
@@ -785,6 +790,28 @@ class UserProfileService:
             education,
         )
 
+    def update_profile_picture(
+        self,
+        *,
+        user_profile: UserProfile,
+        image_bytes: bytes,
+    ) -> UserProfile:
+        old_image_filename = (
+            user_profile.profile_picture
+        )  # Save old filename for deletion.
+
+        new_image_filename = self.__process_profile_image(image_bytes)
+
+        self.user_profile_repository.update_profile_picture(
+            user_profile,
+            new_image_filename,
+        )
+
+        # Delete the old image file after successful DB commit
+        self.__delete_profile_image(old_image_filename)
+
+        return user_profile
+
     # Private helper functions
     def __get_user_by_username(
         self,
@@ -915,3 +942,49 @@ class UserProfileService:
             raise UserExperienceNotFoundError()
 
         return experience
+
+    def __delete_profile_image(self, filename: str | None):
+        if filename is None:
+            return
+
+        file_path = settings.USER_PROFILE_PICTURES_DIRECTORY.joinpath(
+            filename
+        ).absolute()
+
+        if file_path.exists():
+            file_path.unlink()
+
+    def __process_profile_image(self, image_bytes: bytes) -> str:
+        try:
+            original = Image.open(BytesIO(image_bytes))
+        except Exception as e:
+            raise InvalidImageError()
+
+        original = ImageOps.exif_transpose(original)
+
+        # Resize and crop to 300x300
+        image = original.copy()
+        image.thumbnail((300, 300), Image.Resampling.LANCZOS)
+        image = ImageOps.fit(
+            image,
+            (300, 300),
+            Image.Resampling.LANCZOS,
+            centering=(0.5, 0.5),
+        )
+
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+
+        filename = f"{uuid.uuid4()}.jpg"
+        filepath = settings.USER_PROFILE_PICTURES_DIRECTORY.joinpath(
+            filename
+        ).absolute()
+
+        image.save(
+            filepath,
+            "JPEG",
+            quality=85,
+            optimize=True,
+        )
+
+        return filename
