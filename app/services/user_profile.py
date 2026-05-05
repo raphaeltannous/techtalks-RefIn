@@ -812,6 +812,25 @@ class UserProfileService:
 
         return user_profile
 
+    def update_profile_banner(
+        self,
+        *,
+        user_profile: UserProfile,
+        image_bytes: bytes,
+    ) -> UserProfile:
+        old_image_filename = user_profile.banner
+
+        new_image_filename = self.__process_banner(image_bytes)
+
+        self.user_profile_repository.update_banner(
+            user_profile,
+            new_image_filename,
+        )
+
+        self.__delete_banner(old_image_filename)
+
+        return user_profile
+
     # Private helper functions
     def __get_user_by_username(
         self,
@@ -978,6 +997,52 @@ class UserProfileService:
         filename = f"{uuid.uuid4()}.jpg"
         filepath = settings.USER_PROFILE_PICTURES_DIRECTORY.joinpath(
             filename
+        ).absolute()
+
+        image.save(
+            filepath,
+            "JPEG",
+            quality=85,
+            optimize=True,
+        )
+
+        return filename
+
+    def __delete_banner(self, filename: str | None):
+        if filename is None:
+            return
+
+        file_path = settings.USER_PROFILE_BANNERS_DIRECTORY.joinpath(
+            filename
+        ).absolute()
+
+        if file_path.exists():
+            file_path.unlink()
+
+    def __process_banner(self, image_bytes: bytes) -> str:
+        try:
+            original = Image.open(BytesIO(image_bytes))
+        except Exception:
+            raise InvalidImageError()
+
+        original = ImageOps.exif_transpose(original)
+
+        # Resize and crop to 700x300
+        image = original.copy()
+        image.thumbnail((700, 300), Image.Resampling.LANCZOS)
+        image = ImageOps.fit(
+            image,
+            (700, 300),
+            Image.Resampling.LANCZOS,
+            centering=(0.5, 0.5),
+        )
+
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+
+        filename = f"{uuid.uuid4()}.jpg"
+        filepath = settings.USER_PROFILE_BANNERS_DIRECTORY.joinpath(
+            filename,
         ).absolute()
 
         image.save(
