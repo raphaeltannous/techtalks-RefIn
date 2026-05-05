@@ -1,6 +1,7 @@
 import uuid
 from typing import Sequence
 
+from exceptions import UserSkillNotFoundError
 from models.user_skill import (
     UserSkill,
     UserSkillUpdate,
@@ -34,9 +35,14 @@ class PostgresUserSkillRepository(UserSkillRepository):
     def get_by_id(
         self,
         skill_id: uuid.UUID,
-    ) -> UserSkill | None:
+    ) -> UserSkill:
         with Session(self.engine) as session:
-            return session.get(UserSkill, skill_id)
+            skill = session.get(UserSkill, skill_id)
+
+            if skill is None:
+                raise UserSkillNotFoundError()
+
+            return skill
 
     def add(
         self,
