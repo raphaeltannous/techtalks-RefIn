@@ -3,13 +3,13 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 from models.message import Message
+from models.user_profile import UserProfile
 from models.user_experience import (
     UserExperienceIn,
     UserExperiencePublic,
     UserExperiencesPublic,
     UserExperienceUpdate,
 )
-from models.user_profile import UserProfile
 from routers.dependencies import get_current_user_profile, get_user_profile_service
 from services.user_profile import UserProfileService
 
@@ -22,15 +22,37 @@ router = APIRouter(
     "/by-username/{username}",
     response_model=UserExperiencesPublic,
 )
-def get_user_experiences(
+def get_all_by_username(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
     ],
     username: str,
 ) -> Any:
-    return user_profile_service.get_all_experiences_by_username(
+    """
+    Get all user experiences by username.
+    """
+    return user_profile_service.experience_service.get_all_by_username(
         username=username,
+    )
+
+
+@router.get(
+    "/{experience_id}",
+    response_model=UserExperiencePublic,
+)
+def get_by_id(
+    *,
+    user_profile_service: Annotated[
+        UserProfileService, Depends(get_user_profile_service)
+    ],
+    experience_id: uuid.UUID,
+) -> Any:
+    """
+    Get user experience by id.
+    """
+    return user_profile_service.experience_service.get_by_id(
+        experience_id=experience_id,
     )
 
 
@@ -38,7 +60,7 @@ def get_user_experiences(
     "/",
     response_model=UserExperiencePublic,
 )
-def add_experience(
+def add(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -49,25 +71,9 @@ def add_experience(
     """
     Add new user experience.
     """
-    return user_profile_service.add_experience(
+    return user_profile_service.experience_service.add(
         user_profile=user_profile,
         experience_in=experience_in,
-    )
-
-
-@router.get(
-    "/{experience_id}",
-    response_model=UserExperiencePublic,
-)
-def get_experience_by_id(
-    *,
-    user_profile_service: Annotated[
-        UserProfileService, Depends(get_user_profile_service)
-    ],
-    experience_id: uuid.UUID,
-) -> Any:
-    return user_profile_service.get_experience_by_id(
-        experience_id=experience_id,
     )
 
 
@@ -75,7 +81,7 @@ def get_experience_by_id(
     "/{experience_id}",
     response_model=UserExperiencePublic,
 )
-def update_experience(
+def update(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -84,7 +90,10 @@ def update_experience(
     experience_id: uuid.UUID,
     experience_in: UserExperienceUpdate,
 ) -> Any:
-    return user_profile_service.update_experience(
+    """
+    Update user experience.
+    """
+    return user_profile_service.experience_service.update(
         user_profile=user_profile,
         experience_id=experience_id,
         experience_in=experience_in,
@@ -95,7 +104,7 @@ def update_experience(
     "/{experience_id}",
     response_model=Message,
 )
-def delete_experience(
+def delete(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -103,10 +112,14 @@ def delete_experience(
     user_profile: Annotated[UserProfile, Depends(get_current_user_profile)],
     experience_id: uuid.UUID,
 ) -> Any:
-    user_profile_service.delete_experience(
+    """
+    Delete user experience.
+    """
+    user_profile_service.experience_service.delete(
         user_profile=user_profile,
         experience_id=experience_id,
     )
+
     return Message(
-        message="User Experience deleted.",
+        message="User experience deleted.",
     )
