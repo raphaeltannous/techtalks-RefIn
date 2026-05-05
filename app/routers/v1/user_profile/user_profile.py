@@ -21,7 +21,7 @@ router = APIRouter(
     "/by-username/{username}",
     response_model=UserProfilePublic,
 )
-def get_user_profile(
+def get_by_username(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -37,7 +37,7 @@ def get_user_profile(
     "/",
     response_model=UserProfilePublic,
 )
-def update_profile(
+def update(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
