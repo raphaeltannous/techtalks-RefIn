@@ -30,6 +30,14 @@ class UserProfileRepository:
         pass
 
     @abstractmethod
+    def update_banner(
+        self,
+        profile_db: UserProfile,
+        filename: str,
+    ) -> UserProfile:
+        pass
+
+    @abstractmethod
     def update(
         self,
         profile_db: UserProfile,

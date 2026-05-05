@@ -44,6 +44,20 @@ class PostgresUserProfileRepository(UserProfileRepository):
 
             return profile_db
 
+    def update_banner(
+        self,
+        profile_db: UserProfile,
+        filename: str,
+    ) -> UserProfile:
+        with Session(self.engine) as session:
+            profile_db.banner = filename
+
+            session.add(profile_db)
+            session.commit()
+            session.refresh(profile_db)
+
+            return profile_db
+
     def update(
         self,
         profile_db: UserProfile,
