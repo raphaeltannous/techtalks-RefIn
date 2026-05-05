@@ -144,3 +144,11 @@ class UserProfilePictureNotFound(HTTPException):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Profile picture not found",
         )
+
+
+class UserProfileBannerNotFound(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile banner not found",
+        )
