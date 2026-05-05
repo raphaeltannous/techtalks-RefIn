@@ -3,13 +3,13 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 from models.message import Message
+from models.user_profile import UserProfile
 from models.user_link import (
     UserLinkIn,
     UserLinkPublic,
     UserLinksPublic,
     UserLinkUpdate,
 )
-from models.user_profile import UserProfile
 from routers.dependencies import get_current_user_profile, get_user_profile_service
 from services.user_profile import UserProfileService
 
@@ -22,15 +22,37 @@ router = APIRouter(
     "/by-username/{username}",
     response_model=UserLinksPublic,
 )
-def get_user_links(
+def get_all_by_username(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
     ],
     username: str,
 ) -> Any:
-    return user_profile_service.get_all_links_by_username(
+    """
+    Get all user links by username.
+    """
+    return user_profile_service.link_service.get_all_by_username(
         username=username,
+    )
+
+
+@router.get(
+    "/{link_id}",
+    response_model=UserLinkPublic,
+)
+def get_by_id(
+    *,
+    user_profile_service: Annotated[
+        UserProfileService, Depends(get_user_profile_service)
+    ],
+    link_id: uuid.UUID,
+) -> Any:
+    """
+    Get user link by id.
+    """
+    return user_profile_service.link_service.get_by_id(
+        link_id=link_id,
     )
 
 
@@ -38,7 +60,7 @@ def get_user_links(
     "/",
     response_model=UserLinkPublic,
 )
-def add_link(
+def add(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -49,25 +71,9 @@ def add_link(
     """
     Add new user link.
     """
-    return user_profile_service.add_link(
+    return user_profile_service.link_service.add(
         user_profile=user_profile,
         link_in=link_in,
-    )
-
-
-@router.get(
-    "/{link_id}",
-    response_model=UserLinkPublic,
-)
-def get_link_by_id(
-    *,
-    user_profile_service: Annotated[
-        UserProfileService, Depends(get_user_profile_service)
-    ],
-    link_id: uuid.UUID,
-) -> Any:
-    return user_profile_service.get_link_by_id(
-        link_id=link_id,
     )
 
 
@@ -75,7 +81,7 @@ def get_link_by_id(
     "/{link_id}",
     response_model=UserLinkPublic,
 )
-def update_link(
+def update(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -84,7 +90,10 @@ def update_link(
     link_id: uuid.UUID,
     link_in: UserLinkUpdate,
 ) -> Any:
-    return user_profile_service.update_link(
+    """
+    Update user link.
+    """
+    return user_profile_service.link_service.update(
         user_profile=user_profile,
         link_id=link_id,
         link_in=link_in,
@@ -95,7 +104,7 @@ def update_link(
     "/{link_id}",
     response_model=Message,
 )
-def delete_link(
+def delete(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -103,10 +112,14 @@ def delete_link(
     user_profile: Annotated[UserProfile, Depends(get_current_user_profile)],
     link_id: uuid.UUID,
 ) -> Any:
-    user_profile_service.delete_link(
+    """
+    Delete user link.
+    """
+    user_profile_service.link_service.delete(
         user_profile=user_profile,
         link_id=link_id,
     )
+
     return Message(
         message="User link deleted.",
     )
