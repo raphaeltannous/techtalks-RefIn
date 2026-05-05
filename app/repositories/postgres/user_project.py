@@ -1,6 +1,7 @@
 import uuid
 from typing import Sequence
 
+from exceptions import UserProjectNotFoundError
 from models.user_project import UserProject, UserProjectUpdate
 from repositories.user_project import UserProjectRepository
 from sqlmodel import Session, col, select
@@ -31,9 +32,14 @@ class PostgresUserProjectRepository(UserProjectRepository):
     def get_by_id(
         self,
         project_id: uuid.UUID,
-    ) -> UserProject | None:
+    ) -> UserProject:
         with Session(self.engine) as session:
-            return session.get(UserProject, project_id)
+            project = session.get(UserProject, project_id)
+
+            if project is None:
+                raise UserProjectNotFoundError()
+
+            return project
 
     def add(
         self,
