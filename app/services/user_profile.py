@@ -184,7 +184,7 @@ class UserProfileService:
     def __process_profile_picture(self, image_bytes: bytes) -> str:
         try:
             original = Image.open(BytesIO(image_bytes))
-        except Exception as e:
+        except Exception:
             raise InvalidImageError()
 
         original = ImageOps.exif_transpose(original)
