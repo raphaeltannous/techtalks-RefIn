@@ -11,14 +11,20 @@ class UserProfileRepository:
     def get_by_id(
         self,
         profile_id: uuid.UUID,
-    ) -> UserProfile | None:
+    ) -> UserProfile:
+        """
+        Will raise UserProfileNotFoundError() when not found.
+        """
         pass
 
     @abstractmethod
     def get_by_user_id(
         self,
         user_id: uuid.UUID,
-    ) -> UserProfile | None:
+    ) -> UserProfile:
+        """
+        Will raise UserProfileNotFoundError() when not found.
+        """
         pass
 
     @abstractmethod
