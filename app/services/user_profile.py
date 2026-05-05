@@ -4,70 +4,9 @@ from io import BytesIO
 
 from config import settings
 from exceptions import (
-    ForbiddenAction,
     InvalidImageError,
-    UserCertificateNotFoundError,
-    UserEducationNotFoundError,
-    UserExperienceNotFoundError,
-    UserLanguageNotFoundError,
-    UserLinkNotFoundError,
-    UserNotFoundError,
-    UserProfileNotFoundError,
-    UserProjectNotFoundError,
-    UserSkillNotFoundError,
-)
-from fastapi import File, UploadFile
-from models.user import User
-from models.user_certificate import (
-    UserCertificate,
-    UserCertificateIn,
-    UserCertificatePublic,
-    UserCertificatesPublic,
-    UserCertificateUpdate,
-)
-from models.user_education import (
-    UserEducation,
-    UserEducationIn,
-    UserEducationPublic,
-    UserEducationsPublic,
-    UserEducationUpdate,
-)
-from models.user_experience import (
-    UserExperience,
-    UserExperienceIn,
-    UserExperiencePublic,
-    UserExperiencesPublic,
-    UserExperienceUpdate,
-)
-from models.user_language import (
-    UserLanguage,
-    UserLanguageIn,
-    UserLanguagePublic,
-    UserLanguagesPublic,
-    UserLanguageUpdate,
-)
-from models.user_link import (
-    UserLink,
-    UserLinkIn,
-    UserLinkPublic,
-    UserLinksPublic,
-    UserLinkUpdate,
 )
 from models.user_profile import UserProfile, UserProfilePublic, UserProfileUpdate
-from models.user_project import (
-    UserProject,
-    UserProjectIn,
-    UserProjectPublic,
-    UserProjectsPublic,
-    UserProjectUpdate,
-)
-from models.user_skill import (
-    UserSkill,
-    UserSkillIn,
-    UserSkillPublic,
-    UserSkillsPublic,
-    UserSkillUpdate,
-)
 from PIL import Image, ImageOps
 from repositories.user import UserRepository
 from repositories.user_certificate import UserCertificateRepository
@@ -78,6 +17,14 @@ from repositories.user_link import UserLinkRepository
 from repositories.user_profile import UserProfileRepository
 from repositories.user_project import UserProjectRepository
 from repositories.user_skill import UserSkillRepository
+
+from .user_certificate import UserCertificateService
+from .user_education import UserEducationService
+from .user_experience import UserExperienceService
+from .user_language import UserLanguageService
+from .user_link import UserLinkService
+from .user_project import UserProjectService
+from .user_skill import UserSkillService
 
 
 class UserProfileService:
@@ -103,6 +50,42 @@ class UserProfileService:
         self.user_education_repository = user_education_repository
         self.user_certificate_repository = user_certificate_repository
 
+        self.skill_service = UserSkillService(
+            user_repository,
+            user_profile_repository,
+            user_skill_repository,
+        )
+        self.link_service = UserLinkService(
+            user_repository,
+            user_profile_repository,
+            user_link_repository,
+        )
+        self.project_service = UserProjectService(
+            user_repository,
+            user_profile_repository,
+            user_project_repository,
+        )
+        self.language_service = UserLanguageService(
+            user_repository,
+            user_profile_repository,
+            user_language_repository,
+        )
+        self.experience_service = UserExperienceService(
+            user_repository,
+            user_profile_repository,
+            user_experience_repository,
+        )
+        self.education_service = UserEducationService(
+            user_repository,
+            user_profile_repository,
+            user_education_repository,
+        )
+        self.certificate_service = UserCertificateService(
+            user_repository,
+            user_profile_repository,
+            user_certificate_repository,
+        )
+
         self.logger = logging.getLogger("uvicorn.error")
 
     def get_by_user_id(
@@ -110,7 +93,7 @@ class UserProfileService:
         *,
         user_id: uuid.UUID,
     ) -> UserProfile:
-        return self.__get_user_profile_by_user_id(
+        return self.user_profile_repository.get_by_user_id(
             user_id=user_id,
         )
 
@@ -119,7 +102,9 @@ class UserProfileService:
         *,
         username: str,
     ) -> UserProfilePublic:
-        user = self.__get_user_by_username(username=username)
+        user = self.user_repository.get_by_username(
+            username=username,
+        )
 
         profile = self.get_by_user_id(
             user_id=user.id,
@@ -129,7 +114,7 @@ class UserProfileService:
             profile,
         )
 
-    def update_profile(
+    def update(
         self,
         *,
         user_profile: UserProfile,
@@ -144,652 +129,6 @@ class UserProfileService:
             profile,
         )
 
-    def get_all_skills_by_username(
-        self,
-        *,
-        username: str,
-    ) -> UserSkillsPublic:
-        user = self.__get_user_by_username(
-            username=username,
-        )
-
-        user_profile = self.__get_user_profile_by_user_id(
-            user_id=user.id,
-        )
-
-        skills = self.user_skill_repository.get_all_by_user_profile_id(
-            user_profile.id,
-        )
-
-        public_skills = [UserSkillPublic.model_validate(s) for s in skills]
-
-        return UserSkillsPublic(
-            skills=public_skills,
-        )
-
-    def get_skill_by_id(
-        self,
-        *,
-        skill_id: uuid.UUID,
-    ) -> UserSkillPublic:
-        skill = self.__get_skill_by_id(skill_id=skill_id)
-
-        return UserSkillPublic.model_validate(
-            skill,
-        )
-
-    def add_skill(
-        self,
-        *,
-        user_profile: UserProfile,
-        skill_in: UserSkillIn,
-    ) -> UserSkillPublic:
-        skill = UserSkill.model_validate(
-            skill_in,
-            update={
-                "user_profile_id": user_profile.id,
-            },
-        )
-
-        skill = self.user_skill_repository.add(
-            skill,
-        )
-
-        return UserSkillPublic.model_validate(
-            skill,
-        )
-
-    def delete_skill(
-        self,
-        *,
-        user_profile: UserProfile,
-        skill_id: uuid.UUID,
-    ) -> None:
-        skill = self.__get_skill_by_id(skill_id=skill_id)
-
-        if skill.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        self.user_skill_repository.delete(
-            skill_db=skill,
-        )
-
-    def update_skill(
-        self,
-        *,
-        user_profile: UserProfile,
-        skill_id: uuid.UUID,
-        skill_in: UserSkillUpdate,
-    ) -> UserSkillPublic:
-        skill = self.__get_skill_by_id(skill_id=skill_id)
-
-        if skill.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        skill = self.user_skill_repository.update(
-            skill_db=skill,
-            skill_in=skill_in,
-        )
-
-        return UserSkillPublic.model_validate(
-            skill,
-        )
-
-    def get_all_languages_by_username(
-        self,
-        *,
-        username: str,
-    ) -> UserLanguagesPublic:
-        user = self.__get_user_by_username(
-            username=username,
-        )
-
-        user_profile = self.__get_user_profile_by_user_id(
-            user_id=user.id,
-        )
-
-        languages = self.user_language_repository.get_all_by_user_profile_id(
-            user_profile.id,
-        )
-
-        public_languages = [
-            UserLanguagePublic.model_validate(language) for language in languages
-        ]
-
-        return UserLanguagesPublic(
-            languages=public_languages,
-        )
-
-    def get_language_by_id(
-        self,
-        *,
-        language_id: uuid.UUID,
-    ) -> UserLanguagePublic:
-        language = self.__get_language_by_id(language_id=language_id)
-
-        return UserLanguagePublic.model_validate(
-            language,
-        )
-
-    def add_language(
-        self,
-        *,
-        user_profile: UserProfile,
-        language_in: UserLanguageIn,
-    ) -> UserLanguagePublic:
-        language = UserLanguage.model_validate(
-            language_in,
-            update={
-                "user_profile_id": user_profile.id,
-            },
-        )
-
-        language = self.user_language_repository.add(
-            language,
-        )
-
-        return UserLanguagePublic.model_validate(
-            language,
-        )
-
-    def delete_language(
-        self,
-        *,
-        user_profile: UserProfile,
-        language_id: uuid.UUID,
-    ) -> None:
-        language = self.__get_language_by_id(language_id=language_id)
-
-        if language.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        self.user_language_repository.delete(
-            language_db=language,
-        )
-
-    def update_language(
-        self,
-        *,
-        user_profile: UserProfile,
-        language_id: uuid.UUID,
-        language_in: UserLanguageUpdate,
-    ) -> UserLanguagePublic:
-        language = self.__get_language_by_id(language_id=language_id)
-
-        if language.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        language = self.user_language_repository.update(
-            language_db=language,
-            language_in=language_in,
-        )
-
-        return UserLanguagePublic.model_validate(
-            language,
-        )
-
-    def get_all_links_by_username(
-        self,
-        *,
-        username: str,
-    ) -> UserLinksPublic:
-        user = self.__get_user_by_username(
-            username=username,
-        )
-
-        user_profile = self.__get_user_profile_by_user_id(
-            user_id=user.id,
-        )
-
-        links = self.user_link_repository.get_all_by_user_profile_id(
-            user_profile.id,
-        )
-
-        public_links = [UserLinkPublic.model_validate(link) for link in links]
-
-        return UserLinksPublic(
-            links=public_links,
-        )
-
-    def get_link_by_id(
-        self,
-        *,
-        link_id: uuid.UUID,
-    ) -> UserLinkPublic:
-        link = self.__get_link_by_id(link_id=link_id)
-
-        return UserLinkPublic.model_validate(
-            link,
-        )
-
-    def add_link(
-        self,
-        *,
-        user_profile: UserProfile,
-        link_in: UserLinkIn,
-    ) -> UserLinkPublic:
-        link = UserLink.model_validate(
-            link_in,
-            update={
-                "user_profile_id": user_profile.id,
-            },
-        )
-
-        link = self.user_link_repository.add(
-            link,
-        )
-
-        return UserLinkPublic.model_validate(
-            link,
-        )
-
-    def delete_link(
-        self,
-        *,
-        user_profile: UserProfile,
-        link_id: uuid.UUID,
-    ) -> None:
-        link = self.__get_link_by_id(link_id=link_id)
-
-        if link.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        self.user_link_repository.delete(
-            link_db=link,
-        )
-
-    def update_link(
-        self,
-        *,
-        user_profile: UserProfile,
-        link_id: uuid.UUID,
-        link_in: UserLinkUpdate,
-    ) -> UserLinkPublic:
-        link = self.__get_link_by_id(link_id=link_id)
-
-        if link.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        link = self.user_link_repository.update(
-            link_db=link,
-            link_in=link_in,
-        )
-
-        return UserLinkPublic.model_validate(
-            link,
-        )
-
-    def get_all_projects_by_username(
-        self,
-        *,
-        username: str,
-    ) -> UserProjectsPublic:
-        user = self.__get_user_by_username(
-            username=username,
-        )
-
-        user_profile = self.__get_user_profile_by_user_id(
-            user_id=user.id,
-        )
-
-        projects = self.user_project_repository.get_all_by_user_profile_id(
-            user_profile.id,
-        )
-
-        public_projects = [
-            UserProjectPublic.model_validate(project) for project in projects
-        ]
-
-        return UserProjectsPublic(
-            projects=public_projects,
-        )
-
-    def get_project_by_id(
-        self,
-        *,
-        project_id: uuid.UUID,
-    ) -> UserProjectPublic:
-        project = self.__get_project_by_id(project_id=project_id)
-
-        return UserProjectPublic.model_validate(
-            project,
-        )
-
-    def add_project(
-        self,
-        *,
-        user_profile: UserProfile,
-        project_in: UserProjectIn,
-    ) -> UserProjectPublic:
-        project = UserProject.model_validate(
-            project_in,
-            update={
-                "user_profile_id": user_profile.id,
-            },
-        )
-
-        project = self.user_project_repository.add(
-            project,
-        )
-
-        return UserProjectPublic.model_validate(
-            project,
-        )
-
-    def delete_project(
-        self,
-        *,
-        user_profile: UserProfile,
-        project_id: uuid.UUID,
-    ) -> None:
-        project = self.__get_project_by_id(project_id=project_id)
-
-        if project.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        self.user_project_repository.delete(
-            project_db=project,
-        )
-
-    def update_project(
-        self,
-        *,
-        user_profile: UserProfile,
-        project_id: uuid.UUID,
-        project_in: UserProjectUpdate,
-    ) -> UserProjectPublic:
-        project = self.__get_project_by_id(project_id=project_id)
-
-        if project.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        project = self.user_project_repository.update(
-            project_db=project,
-            project_in=project_in,
-        )
-
-        return UserProjectPublic.model_validate(
-            project,
-        )
-
-    def get_all_certificates_by_username(
-        self,
-        *,
-        username: str,
-    ) -> UserCertificatesPublic:
-        user = self.__get_user_by_username(
-            username=username,
-        )
-
-        user_profile = self.__get_user_profile_by_user_id(
-            user_id=user.id,
-        )
-
-        certificates = self.user_certificate_repository.get_all_by_user_profile_id(
-            user_profile.id,
-        )
-
-        public_certificates = [
-            UserCertificatePublic.model_validate(certificate)
-            for certificate in certificates
-        ]
-
-        return UserCertificatesPublic(
-            certificates=public_certificates,
-        )
-
-    def get_certificate_by_id(
-        self,
-        *,
-        certificate_id: uuid.UUID,
-    ) -> UserCertificatePublic:
-        certificate = self.__get_certificate_by_id(certificate_id=certificate_id)
-
-        return UserCertificatePublic.model_validate(
-            certificate,
-        )
-
-    def add_certificate(
-        self,
-        *,
-        user_profile: UserProfile,
-        certificate_in: UserCertificateIn,
-    ) -> UserCertificatePublic:
-        certificate = UserCertificate.model_validate(
-            certificate_in,
-            update={
-                "user_profile_id": user_profile.id,
-            },
-        )
-
-        certificate = self.user_certificate_repository.add(
-            certificate,
-        )
-
-        return UserCertificatePublic.model_validate(
-            certificate,
-        )
-
-    def delete_certificate(
-        self,
-        *,
-        user_profile: UserProfile,
-        certificate_id: uuid.UUID,
-    ) -> None:
-        certificate = self.__get_certificate_by_id(certificate_id=certificate_id)
-
-        if certificate.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        self.user_certificate_repository.delete(
-            certificate_db=certificate,
-        )
-
-    def update_certificate(
-        self,
-        *,
-        user_profile: UserProfile,
-        certificate_id: uuid.UUID,
-        certificate_in: UserCertificateUpdate,
-    ) -> UserCertificatePublic:
-        certificate = self.__get_certificate_by_id(certificate_id=certificate_id)
-
-        if certificate.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        certificate = self.user_certificate_repository.update(
-            certificate_db=certificate,
-            certificate_in=certificate_in,
-        )
-
-        return UserCertificatePublic.model_validate(
-            certificate,
-        )
-
-    def get_all_experiences_by_username(
-        self,
-        *,
-        username: str,
-    ) -> UserExperiencesPublic:
-        user = self.__get_user_by_username(
-            username=username,
-        )
-        user_profile = self.__get_user_profile_by_user_id(
-            user_id=user.id,
-        )
-        experiences = self.user_experience_repository.get_all_by_user_profile_id(
-            user_profile.id,
-        )
-        public_experiences = [
-            UserExperiencePublic.model_validate(experience)
-            for experience in experiences
-        ]
-
-        return UserExperiencesPublic(
-            experiences=public_experiences,
-        )
-
-    def get_experience_by_id(
-        self,
-        *,
-        experience_id: uuid.UUID,
-    ) -> UserExperiencePublic:
-        experience = self.__get_experience_by_id(experience_id=experience_id)
-
-        return UserExperiencePublic.model_validate(
-            experience,
-        )
-
-    def add_experience(
-        self,
-        *,
-        user_profile: UserProfile,
-        experience_in: UserExperienceIn,
-    ) -> UserExperiencePublic:
-        experience = UserExperience.model_validate(
-            experience_in,
-            update={
-                "user_profile_id": user_profile.id,
-            },
-        )
-
-        experience = self.user_experience_repository.add(
-            experience,
-        )
-
-        return UserExperiencePublic.model_validate(
-            experience,
-        )
-
-    def delete_experience(
-        self,
-        *,
-        user_profile: UserProfile,
-        experience_id: uuid.UUID,
-    ) -> None:
-        experience = self.__get_experience_by_id(experience_id=experience_id)
-
-        if experience.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        self.user_experience_repository.delete(
-            experience_db=experience,
-        )
-
-    def update_experience(
-        self,
-        *,
-        user_profile: UserProfile,
-        experience_id: uuid.UUID,
-        experience_in: UserExperienceUpdate,
-    ) -> UserExperiencePublic:
-        experience = self.__get_experience_by_id(experience_id=experience_id)
-
-        if experience.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        experience = self.user_experience_repository.update(
-            experience_db=experience,
-            experience_in=experience_in,
-        )
-
-        return UserExperiencePublic.model_validate(
-            experience,
-        )
-
-    def get_all_educations_by_username(
-        self,
-        *,
-        username: str,
-    ) -> UserEducationsPublic:
-        user = self.__get_user_by_username(
-            username=username,
-        )
-
-        user_profile = self.__get_user_profile_by_user_id(
-            user_id=user.id,
-        )
-
-        educations = self.user_education_repository.get_all_by_user_profile_id(
-            user_profile.id,
-        )
-
-        public_educations = [
-            UserEducationPublic.model_validate(education) for education in educations
-        ]
-
-        return UserEducationsPublic(
-            educations=public_educations,
-        )
-
-    def get_education_by_id(
-        self,
-        *,
-        education_id: uuid.UUID,
-    ) -> UserEducationPublic:
-        education = self.__get_education_by_id(education_id=education_id)
-
-        return UserEducationPublic.model_validate(
-            education,
-        )
-
-    def add_education(
-        self,
-        *,
-        user_profile: UserProfile,
-        education_in: UserEducationIn,
-    ) -> UserEducationPublic:
-        education = UserEducation.model_validate(
-            education_in,
-            update={
-                "user_profile_id": user_profile.id,
-            },
-        )
-
-        education = self.user_education_repository.add(
-            education,
-        )
-
-        return UserEducationPublic.model_validate(
-            education,
-        )
-
-    def delete_education(
-        self,
-        *,
-        user_profile: UserProfile,
-        education_id: uuid.UUID,
-    ) -> None:
-        education = self.__get_education_by_id(education_id=education_id)
-
-        if education.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        self.user_education_repository.delete(
-            education_db=education,
-        )
-
-    def update_education(
-        self,
-        *,
-        user_profile: UserProfile,
-        education_id: uuid.UUID,
-        education_in: UserEducationUpdate,
-    ) -> UserEducationPublic:
-        education = self.__get_education_by_id(education_id=education_id)
-
-        if education.user_profile_id != user_profile.id:
-            raise ForbiddenAction()
-
-        education = self.user_education_repository.update(
-            education_db=education,
-            education_in=education_in,
-        )
-
-        return UserEducationPublic.model_validate(
-            education,
-        )
-
     def update_profile_picture(
         self,
         *,
@@ -800,19 +139,18 @@ class UserProfileService:
             user_profile.profile_picture
         )  # Save old filename for deletion.
 
-        new_image_filename = self.__process_profile_image(image_bytes)
+        new_image_filename = self.__process_profile_picture(image_bytes)
 
         self.user_profile_repository.update_profile_picture(
             user_profile,
             new_image_filename,
         )
 
-        # Delete the old image file after successful DB commit
-        self.__delete_profile_image(old_image_filename)
+        self.__delete_profile_picture(old_image_filename)
 
         return user_profile
 
-    def update_profile_banner(
+    def update_banner(
         self,
         *,
         user_profile: UserProfile,
@@ -832,137 +170,7 @@ class UserProfileService:
         return user_profile
 
     # Private helper functions
-    def __get_user_by_username(
-        self,
-        *,
-        username: str,
-    ) -> User:
-        user = self.user_repository.get_by_username(
-            username=username,
-        )
-        if not user:
-            raise UserNotFoundError()
-
-        return user
-
-    def __get_user_profile_by_id(
-        self,
-        *,
-        profile_id: uuid.UUID,
-    ) -> UserProfile:
-        profile = self.user_profile_repository.get_by_id(
-            profile_id=profile_id,
-        )
-        if not profile:
-            raise UserProfileNotFoundError()
-
-        return profile
-
-    def __get_user_profile_by_user_id(
-        self,
-        *,
-        user_id: uuid.UUID,
-    ) -> UserProfile:
-        profile = self.user_profile_repository.get_by_user_id(
-            user_id=user_id,
-        )
-        if not profile:
-            raise UserProfileNotFoundError()
-
-        return profile
-
-    def __get_skill_by_id(
-        self,
-        *,
-        skill_id: uuid.UUID,
-    ) -> UserSkill:
-        skill = self.user_skill_repository.get_by_id(
-            skill_id,
-        )
-        if not skill:
-            raise UserSkillNotFoundError()
-
-        return skill
-
-    def __get_language_by_id(
-        self,
-        *,
-        language_id: uuid.UUID,
-    ) -> UserLanguage:
-        language = self.user_language_repository.get_by_id(
-            language_id,
-        )
-        if not language:
-            raise UserLanguageNotFoundError()
-
-        return language
-
-    def __get_link_by_id(
-        self,
-        *,
-        link_id: uuid.UUID,
-    ) -> UserLink:
-        link = self.user_link_repository.get_by_id(
-            link_id,
-        )
-        if not link:
-            raise UserLinkNotFoundError()
-
-        return link
-
-    def __get_education_by_id(
-        self,
-        *,
-        education_id: uuid.UUID,
-    ) -> UserEducation:
-        education = self.user_education_repository.get_by_id(
-            education_id,
-        )
-        if not education:
-            raise UserEducationNotFoundError()
-
-        return education
-
-    def __get_project_by_id(
-        self,
-        *,
-        project_id: uuid.UUID,
-    ) -> UserProject:
-        project = self.user_project_repository.get_by_id(
-            project_id,
-        )
-        if not project:
-            raise UserProjectNotFoundError()
-
-        return project
-
-    def __get_certificate_by_id(
-        self,
-        *,
-        certificate_id: uuid.UUID,
-    ) -> UserCertificate:
-        certificate = self.user_certificate_repository.get_by_id(
-            certificate_id,
-        )
-        if not certificate:
-            raise UserCertificateNotFoundError()
-
-        return certificate
-
-    def __get_experience_by_id(
-        self,
-        *,
-        experience_id: uuid.UUID,
-    ) -> UserExperience:
-        experience = self.user_experience_repository.get_by_id(
-            experience_id,
-        )
-        if not experience:
-            raise UserExperienceNotFoundError()
-
-        return experience
-
-    def __delete_profile_image(self, filename: str | None):
+    def __delete_profile_picture(self, filename: str | None):
         if filename is None:
             return
 
@@ -973,7 +181,7 @@ class UserProfileService:
         if file_path.exists():
             file_path.unlink()
 
-    def __process_profile_image(self, image_bytes: bytes) -> str:
+    def __process_profile_picture(self, image_bytes: bytes) -> str:
         try:
             original = Image.open(BytesIO(image_bytes))
         except Exception as e:
