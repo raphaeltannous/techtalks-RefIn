@@ -19,7 +19,10 @@ class UserEducationRepository:
     def get_by_id(
         self,
         education_id: uuid.UUID,
-    ) -> UserEducation | None:
+    ) -> UserEducation:
+        """
+        Will raise UserEducationNotFoundError() when not found.
+        """
         pass
 
     @abstractmethod
