@@ -136,3 +136,11 @@ class InvalidImageError(HTTPException):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid image file",
         )
+
+
+class UserProfilePictureNotFound(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile picture not found",
+        )
