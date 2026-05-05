@@ -45,7 +45,7 @@ def update_profile(
     user_profile: Annotated[UserProfile, Depends(get_current_user_profile)],
     profile_in: UserProfileUpdate,
 ) -> Any:
-    return user_profile_service.update_profile(
+    return user_profile_service.update(
         user_profile=user_profile,
         profile_in=profile_in,
     )
@@ -104,7 +104,7 @@ async def upload_profile_banner(
     if len(contents) > settings.MAX_USER_PROFILE_UPLOAD_SIZE_BYTES:
         raise UserProfileUploadSizeExceededError()
 
-    return user_profile_service.update_profile_banner(
+    return user_profile_service.update_banner(
         user_profile=user_profile,
         image_bytes=contents,
     )
