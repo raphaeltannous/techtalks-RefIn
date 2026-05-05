@@ -51,7 +51,7 @@ def update_profile(
     )
 
 
-@router.patch(
+@router.put(
     "/profile-picture",
     response_model=UserProfilePublic,
 )
@@ -88,7 +88,7 @@ async def get_profile_picture(
     return file_path
 
 
-@router.patch(
+@router.put(
     "/profile-picture/banner",
     response_model=UserProfilePublic,
 )
