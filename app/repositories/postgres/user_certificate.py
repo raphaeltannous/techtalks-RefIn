@@ -1,6 +1,7 @@
 import uuid
 from typing import Sequence
 
+from exceptions import UserCertificateNotFoundError
 from models.user_certificate import UserCertificate, UserCertificateUpdate
 from repositories.user_certificate import UserCertificateRepository
 from sqlmodel import Session, col, select
@@ -31,9 +32,14 @@ class PostgresUserCertificateRepository(UserCertificateRepository):
     def get_by_id(
         self,
         certificate_id: uuid.UUID,
-    ) -> UserCertificate | None:
+    ) -> UserCertificate:
         with Session(self.engine) as session:
-            return session.get(UserCertificate, certificate_id)
+            certificate = session.get(UserCertificate, certificate_id)
+
+            if certificate is None:
+                raise UserCertificateNotFoundError()
+
+            return certificate
 
     def add(
         self,
