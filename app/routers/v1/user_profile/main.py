@@ -45,4 +45,3 @@ main_user_profile_router.include_router(
     user_education_router,
     prefix="/education",
 )
-)
