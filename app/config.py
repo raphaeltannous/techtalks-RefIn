@@ -1,6 +1,7 @@
 import pathlib
 import secrets
 import warnings
+from pathlib import Path
 from typing import Literal
 from urllib.parse import urljoin
 
@@ -30,7 +31,18 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # TODO: Update to API_VERSION_1_STRING
+    MAX_USER_PROFILE_UPLOAD_SIZE_BYTES: int = 5 * 1024 * 1024  # 5MB
+
+    USER_PROFILE_PICTURES_DIRECTORY: Path = rootProject.joinpath(
+        "media/profile-pictures",
+    )  # How can we set it from env?
+    USER_PROFILE_PICTURES_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
+    USER_PROFILE_BANNERS_DIRECTORY: Path = rootProject.joinpath(
+        "media/profile-banners",
+    )
+    USER_PROFILE_BANNERS_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
     API_VERSION_1_STRING: str = "/api/v1"
 
     SECRET_KEY: str = secrets.token_urlsafe(nbytes=32)

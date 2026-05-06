@@ -1,3 +1,4 @@
+from config import settings
 from fastapi import HTTPException, status
 
 
@@ -118,4 +119,36 @@ class UserExperienceNotFoundError(HTTPException):
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User experience not found",
+        )
+
+
+class UserProfileUploadSizeExceededError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File too large. Maximum size is {settings.MAX_USER_PROFILE_UPLOAD_SIZE_BYTES / (1024 * 1024):.0f}MB",
+        )
+
+
+class InvalidImageError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid image file",
+        )
+
+
+class UserProfilePictureNotFound(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile picture not found",
+        )
+
+
+class UserProfileBannerNotFound(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile banner not found",
         )
