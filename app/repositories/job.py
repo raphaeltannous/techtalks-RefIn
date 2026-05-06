@@ -31,7 +31,7 @@ class JobRepository:
         job_id: uuid.UUID,
     ) -> Job:
         """
-        Will raise UserNotFoundError() when not found.
+        Will raise JobNotFoundError() when not found.
         """
         pass
 
