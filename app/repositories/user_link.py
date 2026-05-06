@@ -19,7 +19,10 @@ class UserLinkRepository:
     def get_by_id(
         self,
         link_id: uuid.UUID,
-    ) -> UserLink | None:
+    ) -> UserLink:
+        """
+        Will raise UserLinkNotFoundError() when not found.
+        """
         pass
 
     @abstractmethod

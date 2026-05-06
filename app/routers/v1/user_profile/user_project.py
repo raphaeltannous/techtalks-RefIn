@@ -22,15 +22,37 @@ router = APIRouter(
     "/by-username/{username}",
     response_model=UserProjectsPublic,
 )
-def get_user_projects(
+def get_all_by_username(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
     ],
     username: str,
 ) -> Any:
-    return user_profile_service.get_all_projects_by_username(
+    """
+    Get all user projects by username.
+    """
+    return user_profile_service.project_service.get_all_by_username(
         username=username,
+    )
+
+
+@router.get(
+    "/{project_id}",
+    response_model=UserProjectPublic,
+)
+def get_by_id(
+    *,
+    user_profile_service: Annotated[
+        UserProfileService, Depends(get_user_profile_service)
+    ],
+    project_id: uuid.UUID,
+) -> Any:
+    """
+    Get user project by id.
+    """
+    return user_profile_service.project_service.get_by_id(
+        project_id=project_id,
     )
 
 
@@ -38,7 +60,7 @@ def get_user_projects(
     "/",
     response_model=UserProjectPublic,
 )
-def add_project(
+def add(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -49,25 +71,9 @@ def add_project(
     """
     Add new user project.
     """
-    return user_profile_service.add_project(
+    return user_profile_service.project_service.add(
         user_profile=user_profile,
         project_in=project_in,
-    )
-
-
-@router.get(
-    "/{project_id}",
-    response_model=UserProjectPublic,
-)
-def get_project_by_id(
-    *,
-    user_profile_service: Annotated[
-        UserProfileService, Depends(get_user_profile_service)
-    ],
-    project_id: uuid.UUID,
-) -> Any:
-    return user_profile_service.get_project_by_id(
-        project_id=project_id,
     )
 
 
@@ -75,7 +81,7 @@ def get_project_by_id(
     "/{project_id}",
     response_model=UserProjectPublic,
 )
-def update_project(
+def update(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -84,7 +90,10 @@ def update_project(
     project_id: uuid.UUID,
     project_in: UserProjectUpdate,
 ) -> Any:
-    return user_profile_service.update_project(
+    """
+    Update user project.
+    """
+    return user_profile_service.project_service.update(
         user_profile=user_profile,
         project_id=project_id,
         project_in=project_in,
@@ -95,7 +104,7 @@ def update_project(
     "/{project_id}",
     response_model=Message,
 )
-def delete_project(
+def delete(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -103,10 +112,14 @@ def delete_project(
     user_profile: Annotated[UserProfile, Depends(get_current_user_profile)],
     project_id: uuid.UUID,
 ) -> Any:
-    user_profile_service.delete_project(
+    """
+    Delete user project.
+    """
+    user_profile_service.project_service.delete(
         user_profile=user_profile,
         project_id=project_id,
     )
+
     return Message(
         message="User project deleted.",
     )

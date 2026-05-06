@@ -21,7 +21,7 @@ router = APIRouter(
     "/by-username/{username}",
     response_model=UserProfilePublic,
 )
-def get_user_profile(
+def get_by_username(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -37,7 +37,7 @@ def get_user_profile(
     "/",
     response_model=UserProfilePublic,
 )
-def update_profile(
+def update(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -45,7 +45,7 @@ def update_profile(
     user_profile: Annotated[UserProfile, Depends(get_current_user_profile)],
     profile_in: UserProfileUpdate,
 ) -> Any:
-    return user_profile_service.update_profile(
+    return user_profile_service.update(
         user_profile=user_profile,
         profile_in=profile_in,
     )
@@ -82,7 +82,7 @@ async def get_profile_picture(
 ) -> Any:
     file_path = settings.USER_PROFILE_PICTURES_DIRECTORY.joinpath(filename).absolute()
 
-    if not file_path.exists():
+    if (not file_path.exists()) or ("../" in str(file_path)):
         raise UserProfilePictureNotFound()
 
     return file_path
@@ -104,7 +104,7 @@ async def upload_profile_banner(
     if len(contents) > settings.MAX_USER_PROFILE_UPLOAD_SIZE_BYTES:
         raise UserProfileUploadSizeExceededError()
 
-    return user_profile_service.update_profile_banner(
+    return user_profile_service.update_banner(
         user_profile=user_profile,
         image_bytes=contents,
     )
@@ -119,7 +119,7 @@ async def get_profile_banner(
 ) -> Any:
     file_path = settings.USER_PROFILE_BANNERS_DIRECTORY.joinpath(filename).absolute()
 
-    if not file_path.exists():
+    if (not file_path.exists()) or ("../" in str(file_path)):
         raise UserProfileBannerNotFound()
 
     return file_path

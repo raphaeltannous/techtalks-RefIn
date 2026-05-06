@@ -19,7 +19,10 @@ class UserSkillRepository:
     def get_by_id(
         self,
         skill_id: uuid.UUID,
-    ) -> UserSkill | None:
+    ) -> UserSkill:
+        """
+        Will raise UserSkillNotFoundError() when not found.
+        """
         pass
 
     @abstractmethod

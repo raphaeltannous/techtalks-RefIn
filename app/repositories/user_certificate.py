@@ -19,7 +19,10 @@ class UserCertificateRepository:
     def get_by_id(
         self,
         certificate_id: uuid.UUID,
-    ) -> UserCertificate | None:
+    ) -> UserCertificate:
+        """
+        Will raise UserCertificateNotFoundError() when not found.
+        """
         pass
 
     @abstractmethod

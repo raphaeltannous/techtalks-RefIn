@@ -1,6 +1,7 @@
 import uuid
 from typing import Sequence
 
+from exceptions import UserLanguageNotFoundError
 from models.user_language import (
     UserLanguage,
     UserLanguageUpdate,
@@ -34,9 +35,14 @@ class PostgresUserLanguageRepository(UserLanguageRepository):
     def get_by_id(
         self,
         language_id: uuid.UUID,
-    ) -> UserLanguage | None:
+    ) -> UserLanguage:
         with Session(self.engine) as session:
-            return session.get(UserLanguage, language_id)
+            language = session.get(UserLanguage, language_id)
+
+            if language is None:
+                raise UserLanguageNotFoundError()
+
+            return language
 
     def add(
         self,

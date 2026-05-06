@@ -19,7 +19,10 @@ class UserProjectRepository:
     def get_by_id(
         self,
         project_id: uuid.UUID,
-    ) -> UserProject | None:
+    ) -> UserProject:
+        """
+        Will raise UserProjectNotFoundError() when not found.
+        """
         pass
 
     @abstractmethod

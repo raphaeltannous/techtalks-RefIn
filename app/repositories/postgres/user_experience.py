@@ -1,6 +1,7 @@
 import uuid
 from typing import Sequence
 
+from exceptions import UserExperienceNotFoundError
 from models.user_experience import UserExperience, UserExperienceUpdate
 from repositories.user_experience import UserExperienceRepository
 from sqlmodel import Session, col, select
@@ -31,9 +32,14 @@ class PostgresUserExperienceRepository(UserExperienceRepository):
     def get_by_id(
         self,
         experience_id: uuid.UUID,
-    ) -> UserExperience | None:
+    ) -> UserExperience:
         with Session(self.engine) as session:
-            return session.get(UserExperience, experience_id)
+            experience = session.get(UserExperience, experience_id)
+
+            if experience is None:
+                raise UserExperienceNotFoundError()
+
+            return experience
 
     def add(
         self,

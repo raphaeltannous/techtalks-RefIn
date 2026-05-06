@@ -22,15 +22,37 @@ router = APIRouter(
     "/by-username/{username}",
     response_model=UserEducationsPublic,
 )
-def get_user_educations(
+def get_all_by_username(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
     ],
     username: str,
 ) -> Any:
-    return user_profile_service.get_all_educations_by_username(
+    """
+    Get all user educations by username.
+    """
+    return user_profile_service.education_service.get_all_by_username(
         username=username,
+    )
+
+
+@router.get(
+    "/{education_id}",
+    response_model=UserEducationPublic,
+)
+def get_by_id(
+    *,
+    user_profile_service: Annotated[
+        UserProfileService, Depends(get_user_profile_service)
+    ],
+    education_id: uuid.UUID,
+) -> Any:
+    """
+    Get user education by id.
+    """
+    return user_profile_service.education_service.get_by_id(
+        education_id=education_id,
     )
 
 
@@ -38,7 +60,7 @@ def get_user_educations(
     "/",
     response_model=UserEducationPublic,
 )
-def add_education(
+def add(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -49,25 +71,9 @@ def add_education(
     """
     Add new user education.
     """
-    return user_profile_service.add_education(
+    return user_profile_service.education_service.add(
         user_profile=user_profile,
         education_in=education_in,
-    )
-
-
-@router.get(
-    "/{education_id}",
-    response_model=UserEducationPublic,
-)
-def get_education_by_id(
-    *,
-    user_profile_service: Annotated[
-        UserProfileService, Depends(get_user_profile_service)
-    ],
-    education_id: uuid.UUID,
-) -> Any:
-    return user_profile_service.get_education_by_id(
-        education_id=education_id,
     )
 
 
@@ -75,7 +81,7 @@ def get_education_by_id(
     "/{education_id}",
     response_model=UserEducationPublic,
 )
-def update_education(
+def update(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -84,7 +90,10 @@ def update_education(
     education_id: uuid.UUID,
     education_in: UserEducationUpdate,
 ) -> Any:
-    return user_profile_service.update_education(
+    """
+    Update user education.
+    """
+    return user_profile_service.education_service.update(
         user_profile=user_profile,
         education_id=education_id,
         education_in=education_in,
@@ -95,7 +104,7 @@ def update_education(
     "/{education_id}",
     response_model=Message,
 )
-def delete_education(
+def delete(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -103,10 +112,14 @@ def delete_education(
     user_profile: Annotated[UserProfile, Depends(get_current_user_profile)],
     education_id: uuid.UUID,
 ) -> Any:
-    user_profile_service.delete_education(
+    """
+    Delete user education.
+    """
+    user_profile_service.education_service.delete(
         user_profile=user_profile,
         education_id=education_id,
     )
+
     return Message(
         message="User education deleted.",
     )

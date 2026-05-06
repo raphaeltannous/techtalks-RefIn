@@ -19,7 +19,10 @@ class UserLanguageRepository:
     def get_by_id(
         self,
         language_id: uuid.UUID,
-    ) -> UserLanguage | None:
+    ) -> UserLanguage:
+        """
+        Will raise UserLanguageNotFoundError() when not found.
+        """
         pass
 
     @abstractmethod

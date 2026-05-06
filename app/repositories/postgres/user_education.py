@@ -1,6 +1,7 @@
 import uuid
 from typing import Sequence
 
+from exceptions import UserEducationNotFoundError
 from models.user_education import UserEducation, UserEducationUpdate
 from repositories.user_education import UserEducationRepository
 from sqlmodel import Session, col, select
@@ -31,9 +32,14 @@ class PostgresUserEducationRepository(UserEducationRepository):
     def get_by_id(
         self,
         education_id: uuid.UUID,
-    ) -> UserEducation | None:
+    ) -> UserEducation:
         with Session(self.engine) as session:
-            return session.get(UserEducation, education_id)
+            education = session.get(UserEducation, education_id)
+
+            if education is None:
+                raise UserEducationNotFoundError()
+
+            return education
 
     def add(
         self,

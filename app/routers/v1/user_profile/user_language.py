@@ -3,13 +3,13 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 from models.message import Message
+from models.user_profile import UserProfile
 from models.user_language import (
     UserLanguageIn,
     UserLanguagePublic,
     UserLanguagesPublic,
     UserLanguageUpdate,
 )
-from models.user_profile import UserProfile
 from routers.dependencies import get_current_user_profile, get_user_profile_service
 from services.user_profile import UserProfileService
 
@@ -22,15 +22,37 @@ router = APIRouter(
     "/by-username/{username}",
     response_model=UserLanguagesPublic,
 )
-def get_user_languages(
+def get_all_by_username(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
     ],
     username: str,
 ) -> Any:
-    return user_profile_service.get_all_languages_by_username(
+    """
+    Get all user languages by username.
+    """
+    return user_profile_service.language_service.get_all_by_username(
         username=username,
+    )
+
+
+@router.get(
+    "/{language_id}",
+    response_model=UserLanguagePublic,
+)
+def get_by_id(
+    *,
+    user_profile_service: Annotated[
+        UserProfileService, Depends(get_user_profile_service)
+    ],
+    language_id: uuid.UUID,
+) -> Any:
+    """
+    Get user language by id.
+    """
+    return user_profile_service.language_service.get_by_id(
+        language_id=language_id,
     )
 
 
@@ -38,7 +60,7 @@ def get_user_languages(
     "/",
     response_model=UserLanguagePublic,
 )
-def add_language(
+def add(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -49,25 +71,9 @@ def add_language(
     """
     Add new user language.
     """
-    return user_profile_service.add_language(
+    return user_profile_service.language_service.add(
         user_profile=user_profile,
         language_in=language_in,
-    )
-
-
-@router.get(
-    "/{language_id}",
-    response_model=UserLanguagePublic,
-)
-def get_language_by_id(
-    *,
-    user_profile_service: Annotated[
-        UserProfileService, Depends(get_user_profile_service)
-    ],
-    language_id: uuid.UUID,
-) -> Any:
-    return user_profile_service.get_language_by_id(
-        language_id=language_id,
     )
 
 
@@ -75,7 +81,7 @@ def get_language_by_id(
     "/{language_id}",
     response_model=UserLanguagePublic,
 )
-def update_language(
+def update(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -84,7 +90,10 @@ def update_language(
     language_id: uuid.UUID,
     language_in: UserLanguageUpdate,
 ) -> Any:
-    return user_profile_service.update_language(
+    """
+    Update user language.
+    """
+    return user_profile_service.language_service.update(
         user_profile=user_profile,
         language_id=language_id,
         language_in=language_in,
@@ -95,7 +104,7 @@ def update_language(
     "/{language_id}",
     response_model=Message,
 )
-def delete_language(
+def delete(
     *,
     user_profile_service: Annotated[
         UserProfileService, Depends(get_user_profile_service)
@@ -103,7 +112,10 @@ def delete_language(
     user_profile: Annotated[UserProfile, Depends(get_current_user_profile)],
     language_id: uuid.UUID,
 ) -> Any:
-    user_profile_service.delete_language(
+    """
+    Delete user language.
+    """
+    user_profile_service.language_service.delete(
         user_profile=user_profile,
         language_id=language_id,
     )
