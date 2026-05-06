@@ -1,3 +1,4 @@
+from pathlib import PurePath
 from typing import Annotated, Any
 
 from config import settings
@@ -80,9 +81,11 @@ async def upload_profile_picture(
 async def get_profile_picture(
     filename: str,
 ) -> Any:
+    filename = PurePath(filename).name
+
     file_path = settings.USER_PROFILE_PICTURES_DIRECTORY.joinpath(filename).absolute()
 
-    if (not file_path.exists()) or ("../" in str(file_path)):
+    if not file_path.exists():
         raise UserProfilePictureNotFound()
 
     return file_path
@@ -117,9 +120,11 @@ async def upload_profile_banner(
 async def get_profile_banner(
     filename: str,
 ) -> Any:
+    filename = PurePath(filename).name
+
     file_path = settings.USER_PROFILE_BANNERS_DIRECTORY.joinpath(filename).absolute()
 
-    if (not file_path.exists()) or ("../" in str(file_path)):
+    if not file_path.exists():
         raise UserProfileBannerNotFound()
 
     return file_path
