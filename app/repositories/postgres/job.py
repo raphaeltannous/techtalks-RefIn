@@ -62,9 +62,6 @@ class PostgresJobRepository(JobRepository):
         self,
         job_id: uuid.UUID,
     ) -> Job:
-        """
-        Will raise UserNotFoundError() when not found.
-        """
         with Session(self.engine) as session:
             job = session.get(Job, job_id)
 
