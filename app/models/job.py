@@ -69,3 +69,7 @@ class Job(JobBase, table=True):
             "onupdate": lambda: datetime.now(timezone.utc),
         },
     )
+
+
+class JobUpdate(JobBase):
+    pass
