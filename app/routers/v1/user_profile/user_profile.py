@@ -82,7 +82,7 @@ async def get_profile_picture(
 ) -> Any:
     file_path = settings.USER_PROFILE_PICTURES_DIRECTORY.joinpath(filename).absolute()
 
-    if not file_path.exists():
+    if (not file_path.exists()) or ("../" in str(file_path)):
         raise UserProfilePictureNotFound()
 
     return file_path
@@ -119,7 +119,7 @@ async def get_profile_banner(
 ) -> Any:
     file_path = settings.USER_PROFILE_BANNERS_DIRECTORY.joinpath(filename).absolute()
 
-    if not file_path.exists():
+    if (not file_path.exists()) or ("../" in str(file_path)):
         raise UserProfileBannerNotFound()
 
     return file_path
