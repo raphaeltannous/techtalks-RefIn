@@ -41,7 +41,7 @@ class JobBase(SQLModel):
     looking_for: JobLookingFor
     years_of_experience: int = Field(default=0)
     apply_on_site: bool = Field(default=True)
-    apply_url: str | None = Field(default=False, max_length=250)
+    apply_url: str | None = Field(default=None, max_length=250)
 
 
 class Job(JobBase, table=True):
@@ -81,6 +81,7 @@ class JobUpdate(JobBase):
 
 class JobPublic(JobBase):
     id: uuid.UUID
+    user_id: uuid.UUID
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
