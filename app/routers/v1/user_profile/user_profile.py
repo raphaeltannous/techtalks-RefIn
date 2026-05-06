@@ -92,7 +92,7 @@ async def get_profile_picture(
 
 
 @router.put(
-    "/profile-picture/banner",
+    "/banner",
     response_model=UserProfilePublic,
 )
 async def upload_profile_banner(
@@ -114,7 +114,7 @@ async def upload_profile_banner(
 
 
 @router.get(
-    "/profile-picture/banner/{filename}",
+    "/banner/{filename}",
     response_class=FileResponse,
 )
 async def get_profile_banner(
