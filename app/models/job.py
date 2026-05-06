@@ -71,5 +71,20 @@ class Job(JobBase, table=True):
     )
 
 
+class JobIn(JobBase):
+    pass
+
+
 class JobUpdate(JobBase):
     pass
+
+
+class JobPublic(JobBase):
+    id: uuid.UUID
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class JobsPublic(SQLModel):
+    jobs: list[JobPublic]
+    count: int
