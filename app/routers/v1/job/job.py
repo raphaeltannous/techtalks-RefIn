@@ -8,6 +8,7 @@ from models.job import (
     JobsPublic,
     JobUpdate,
 )
+from models.message import Message
 from models.user import User
 from routers.dependencies import get_current_user, get_job_service
 from services.job import JobService
@@ -78,7 +79,7 @@ def update(
 
 @router.delete(
     "/{job_id}",
-    response_model=JobPublic,
+    response_model=Message,
 )
 def delete(
     *,
@@ -89,9 +90,13 @@ def delete(
     """
     Delete job.
     """
-    return job_service.delete(
+    job_service.delete(
         user=user,
         job_id=job_id,
+    )
+
+    return Message(
+        message="Job is deleted.",
     )
 
 
