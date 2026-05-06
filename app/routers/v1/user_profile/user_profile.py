@@ -1,3 +1,4 @@
+from pathlib import PurePath
 from typing import Annotated, Any
 
 from config import settings
@@ -80,16 +81,18 @@ async def upload_profile_picture(
 async def get_profile_picture(
     filename: str,
 ) -> Any:
+    filename = PurePath(filename).name
+
     file_path = settings.USER_PROFILE_PICTURES_DIRECTORY.joinpath(filename).absolute()
 
-    if (not file_path.exists()) or ("../" in str(file_path)):
+    if not file_path.exists():
         raise UserProfilePictureNotFound()
 
     return file_path
 
 
 @router.put(
-    "/profile-picture/banner",
+    "/banner",
     response_model=UserProfilePublic,
 )
 async def upload_profile_banner(
@@ -111,15 +114,17 @@ async def upload_profile_banner(
 
 
 @router.get(
-    "/profile-picture/banner/{filename}",
+    "/banner/{filename}",
     response_class=FileResponse,
 )
 async def get_profile_banner(
     filename: str,
 ) -> Any:
+    filename = PurePath(filename).name
+
     file_path = settings.USER_PROFILE_BANNERS_DIRECTORY.joinpath(filename).absolute()
 
-    if (not file_path.exists()) or ("../" in str(file_path)):
+    if not file_path.exists():
         raise UserProfileBannerNotFound()
 
     return file_path
