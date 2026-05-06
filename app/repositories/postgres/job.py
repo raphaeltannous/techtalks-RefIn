@@ -1,11 +1,10 @@
 import uuid
 from typing import Sequence
 
+from exceptions import JobNotFoundError
 from models.job import Job, JobUpdate
 from repositories.job import JobRepository
 from sqlmodel import Session, col, func, select
-
-from app.exceptions import JobNotFoundError
 
 
 class PostgresJobRepository(JobRepository):
