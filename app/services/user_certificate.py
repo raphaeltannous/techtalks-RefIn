@@ -51,7 +51,7 @@ class UserCertificateService:
             certificates=public_certificates,
         )
 
-    def get(
+    def get_by_id(
         self,
         *,
         certificate_id: uuid.UUID,
