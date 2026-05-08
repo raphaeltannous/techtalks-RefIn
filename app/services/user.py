@@ -127,7 +127,10 @@ class UserService:
 
             if user_db is not None:
                 raise DuplicateUserError()
+        except UserNotFoundError:
+            pass
 
+        try:
             user_db = self.get_by_username(user_in.username)
 
             if user_db is not None:
