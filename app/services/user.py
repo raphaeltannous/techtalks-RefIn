@@ -248,12 +248,12 @@ class UserService:
         password_hash = security.password_hashing.get_password_hash(
             prru_in.password,
         )
-        db_user = self.get_by_id(
-            pr_db_obj.user_id,
-        )
 
-        if not db_user:
-            self.logger.error("User does not exist for a valid token")
+        try:
+            db_user = self.get_by_id(
+                pr_db_obj.user_id,
+            )
+        except UserNotFoundError:
             raise InvalidPasswordResetToken()
 
         user_in = UserUpdate(
