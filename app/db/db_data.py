@@ -15,6 +15,7 @@ def init(
             hashed_password=security.password_hashing.get_password_hash(
                 settings.FIRST_ADMIN_PASSWORD,
             ),
+            is_admin=True,
             is_active=True,
             is_verified=True,
         )
