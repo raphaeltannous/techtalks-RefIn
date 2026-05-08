@@ -14,6 +14,7 @@ from exceptions import (
     IncorrectCredentialsError,
     InvalidEmailVerificationToken,
     InvalidPasswordResetToken,
+    UserAlreadyVerifiedError,
     UserNotFoundError,
 )
 from fastapi import BackgroundTasks
@@ -319,7 +320,7 @@ class UserService:
         background_tasks: BackgroundTasks,
     ) -> None:
         if current_user.is_verified:
-            return None
+            raise UserAlreadyVerifiedError()
 
         background_tasks.add_task(
             self.send_verification_email,

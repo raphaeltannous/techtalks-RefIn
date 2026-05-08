@@ -18,6 +18,14 @@ class InactiveUserError(HTTPException):
         )
 
 
+class UserAlreadyVerifiedError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User already verified",
+        )
+
+
 class IncorrectCredentialsError(HTTPException):
     def __init__(self):
         super().__init__(

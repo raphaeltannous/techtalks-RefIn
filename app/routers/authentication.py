@@ -122,7 +122,7 @@ def email_verification_request(
     )
 
     return Message(
-        message="If your email is unverified, a message has been sent.",
+        message="An email has been sent.",
     )
 
 
