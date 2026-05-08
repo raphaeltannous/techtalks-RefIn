@@ -65,11 +65,14 @@ class UserService:
 
         return users, count
 
-    def get_by_id(self, id: uuid.UUID) -> User | None:
+    def get_by_id(self, id: uuid.UUID) -> User:
         return self.user_repository.get_by_id(id)
 
-    def get_by_email(self, email: EmailStr) -> User | None:
+    def get_by_email(self, email: EmailStr) -> User:
         return self.user_repository.get_by_email(email)
+
+    def get_by_username(self, username: str) -> User:
+        return self.user_repository.get_by_username(username)
 
     def authenticate(
         self,
@@ -126,13 +129,18 @@ class UserService:
         user_in: UserRegister,
         background_tasks: BackgroundTasks,
     ) -> UserPublic:
-        user_db = self.get_by_email(user_in.email)
-        if user_db:
-            raise DuplicateUserError()
+        try:
+            user_db = self.get_by_email(user_in.email)
 
-        user_db = self.__get_by_username(user_in.username)
-        if user_db:
-            raise DuplicateUserError()
+            if user_db is not None:
+                raise DuplicateUserError()
+
+            user_db = self.get_by_username(user_in.username)
+
+            if user_db is not None:
+                raise DuplicateUserError()
+        except UserNotFoundError:
+            pass
 
         user = User.model_validate(
             user_in,
@@ -365,10 +373,3 @@ class UserService:
                 expires_at=datetime.now(timezone.utc),
             ),
         )
-
-    def __get_by_username(self, username: str) -> User:
-        user = self.user_repository.get_by_username(username)
-        if not user:
-            raise UserNotFoundError()
-
-        return user
