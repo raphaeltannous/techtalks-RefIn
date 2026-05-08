@@ -73,10 +73,10 @@ class UserService:
         email: EmailStr,
         password: str,
     ) -> Token:
-        user = self.get_by_email(email)
-
-        # Timing attack prevention
-        if not user:
+        try:
+            user = self.get_by_email(email)
+        except UserNotFoundError:
+            # Timing attack prevention
             security.password_hashing.verify_password(
                 password,
                 settings.DUMMY_PASSWORD_HASH,
