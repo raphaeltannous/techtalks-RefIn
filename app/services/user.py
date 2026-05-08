@@ -14,6 +14,7 @@ from exceptions import (
     IncorrectCredentialsError,
     InvalidEmailVerificationToken,
     InvalidPasswordResetToken,
+    UserAlreadyVerifiedError,
     UserNotFoundError,
 )
 from fastapi import BackgroundTasks
@@ -51,6 +52,15 @@ class UserService:
 
         self.logger = logging.getLogger("uvicorn.error")
 
+    def get_by_id(self, id: uuid.UUID) -> User:
+        return self.user_repository.get_by_id(id)
+
+    def get_by_email(self, email: EmailStr) -> User:
+        return self.user_repository.get_by_email(email)
+
+    def get_by_username(self, username: str) -> User:
+        return self.user_repository.get_by_username(username)
+
     def get_public_users(self, offset: int, limit: int) -> UsersPublic:
         users, count = self.user_repository.get_users(offset, limit)
 
@@ -58,29 +68,16 @@ class UserService:
 
         return UsersPublic(users=users_public, count=count)
 
-    def get_private_users(self, offset: int, limit: int) -> tuple[list[User], int]:
-        users, count = self.user_repository.get_users(offset, limit)
-
-        users = [u for u in users]
-
-        return users, count
-
-    def get_by_id(self, id: uuid.UUID) -> User | None:
-        return self.user_repository.get_by_id(id)
-
-    def get_by_email(self, email: EmailStr) -> User | None:
-        return self.user_repository.get_by_email(email)
-
     def authenticate(
         self,
         *,
         email: EmailStr,
         password: str,
     ) -> Token:
-        user = self.get_by_email(email)
-
-        # Timing attack prevention
-        if not user:
+        try:
+            user = self.get_by_email(email)
+        except UserNotFoundError:
+            # Timing attack prevention
             security.password_hashing.verify_password(
                 password,
                 settings.DUMMY_PASSWORD_HASH,
@@ -104,7 +101,7 @@ class UserService:
                 hashed_password=updated_password_hash,
             )
 
-            self.user_repository.update_user(
+            self.user_repository.update(
                 user,
                 user_in,
             )
@@ -120,20 +117,37 @@ class UserService:
             )
         )
 
+    def add(
+        self,
+        *,
+        user_in: User,
+    ) -> User:
+        try:
+            user_db = self.get_by_email(user_in.email)
+
+            if user_db is not None:
+                raise DuplicateUserError()
+        except UserNotFoundError:
+            pass
+
+        try:
+            user_db = self.get_by_username(user_in.username)
+
+            if user_db is not None:
+                raise DuplicateUserError()
+        except UserNotFoundError:
+            pass
+
+        return self.user_repository.add(
+            user_in=user_in,
+        )
+
     def register(
         self,
         *,
         user_in: UserRegister,
         background_tasks: BackgroundTasks,
     ) -> UserPublic:
-        user_db = self.get_by_email(user_in.email)
-        if user_db:
-            raise DuplicateUserError()
-
-        user_db = self.__get_by_username(user_in.username)
-        if user_db:
-            raise DuplicateUserError()
-
         user = User.model_validate(
             user_in,
             update={
@@ -143,8 +157,8 @@ class UserService:
             },
         )
 
-        user = self.user_repository.add_user(
-            user,
+        user = self.add(
+            user_in=user,
         )
 
         background_tasks.add_task(
@@ -167,11 +181,11 @@ class UserService:
         password_reset_request: PasswordResetRequest,
         background_tasks: BackgroundTasks,
     ) -> None:
-        user = self.get_by_email(
-            email=password_reset_request.email,
-        )
-
-        if not user:
+        try:
+            user = self.get_by_email(
+                email=password_reset_request.email,
+            )
+        except UserNotFoundError:  # Timing attack?
             return None
 
         token = secrets.token_hex(32)
@@ -237,19 +251,19 @@ class UserService:
         password_hash = security.password_hashing.get_password_hash(
             prru_in.password,
         )
-        db_user = self.get_by_id(
-            pr_db_obj.user_id,
-        )
 
-        if not db_user:
-            self.logger.error("User does not exist for a valid token")
+        try:
+            db_user = self.get_by_id(
+                pr_db_obj.user_id,
+            )
+        except UserNotFoundError:
             raise InvalidPasswordResetToken()
 
         user_in = UserUpdate(
             hashed_password=password_hash,
         )
 
-        db_user = self.user_repository.update_user(
+        db_user = self.user_repository.update(
             db_user,
             user_in,
         )
@@ -318,7 +332,7 @@ class UserService:
         background_tasks: BackgroundTasks,
     ) -> None:
         if current_user.is_verified:
-            return None
+            raise UserAlreadyVerifiedError()
 
         background_tasks.add_task(
             self.send_verification_email,
@@ -345,15 +359,12 @@ class UserService:
             raise InvalidEmailVerificationToken()
 
         # Valid token
-        db_user = self.get_by_id(ev_db_obj.user_id)
-
-        if not db_user:
-            self.logger.error(
-                "User does not exist for a valid email verification token"
-            )
+        try:
+            db_user = self.get_by_id(ev_db_obj.user_id)
+        except UserNotFoundError:
             raise InvalidEmailVerificationToken()
 
-        self.user_repository.update_user(
+        self.user_repository.update(
             db_user,
             UserUpdate(is_verified=True),
         )
@@ -365,10 +376,3 @@ class UserService:
                 expires_at=datetime.now(timezone.utc),
             ),
         )
-
-    def __get_by_username(self, username: str) -> User:
-        user = self.user_repository.get_by_username(username)
-        if not user:
-            raise UserNotFoundError()
-
-        return user

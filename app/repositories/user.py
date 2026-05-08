@@ -48,14 +48,14 @@ class UserRepository:
         pass
 
     @abstractmethod
-    def add_user(
+    def add(
         self,
         user_in: User,
     ) -> User:
         pass
 
     @abstractmethod
-    def update_user(
+    def update(
         self,
         user_db: User,
         user_in: UserUpdate,
