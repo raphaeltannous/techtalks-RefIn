@@ -117,12 +117,11 @@ class UserService:
             )
         )
 
-    def register(
+    def add(
         self,
         *,
-        user_in: UserRegister,
-        background_tasks: BackgroundTasks,
-    ) -> UserPublic:
+        user_in: User,
+    ) -> User:
         try:
             user_db = self.get_by_email(user_in.email)
 
@@ -136,6 +135,16 @@ class UserService:
         except UserNotFoundError:
             pass
 
+        return self.user_repository.add_user(
+            user_in=user_in,
+        )
+
+    def register(
+        self,
+        *,
+        user_in: UserRegister,
+        background_tasks: BackgroundTasks,
+    ) -> UserPublic:
         user = User.model_validate(
             user_in,
             update={
@@ -145,8 +154,8 @@ class UserService:
             },
         )
 
-        user = self.user_repository.add_user(
-            user,
+        user = self.add(
+            user_in=user,
         )
 
         background_tasks.add_task(
