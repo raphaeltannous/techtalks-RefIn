@@ -1,3 +1,4 @@
+import uuid
 from pathlib import PurePath
 from typing import Annotated, Any
 
@@ -31,6 +32,22 @@ def get_by_username(
 ) -> Any:
     return user_profile_service.get_by_username(
         username=username,
+    )
+
+
+@router.get(
+    "/by-id/{user_id}",
+    response_model=UserProfilePublic,
+)
+def get_by_id(
+    *,
+    user_profile_service: Annotated[
+        UserProfileService, Depends(get_user_profile_service)
+    ],
+    user_id: uuid.UUID,
+) -> Any:
+    return user_profile_service.get_by_user_id(
+        user_id=user_id,
     )
 
 
