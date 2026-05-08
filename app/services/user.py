@@ -359,12 +359,9 @@ class UserService:
             raise InvalidEmailVerificationToken()
 
         # Valid token
-        db_user = self.get_by_id(ev_db_obj.user_id)
-
-        if not db_user:
-            self.logger.error(
-                "User does not exist for a valid email verification token"
-            )
+        try:
+            db_user = self.get_by_id(ev_db_obj.user_id)
+        except UserNotFoundError:
             raise InvalidEmailVerificationToken()
 
         self.user_repository.update(
