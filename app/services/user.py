@@ -51,20 +51,6 @@ class UserService:
 
         self.logger = logging.getLogger("uvicorn.error")
 
-    def get_public_users(self, offset: int, limit: int) -> UsersPublic:
-        users, count = self.user_repository.get_users(offset, limit)
-
-        users_public = [UserPublic.model_validate(user) for user in users]
-
-        return UsersPublic(users=users_public, count=count)
-
-    def get_private_users(self, offset: int, limit: int) -> tuple[list[User], int]:
-        users, count = self.user_repository.get_users(offset, limit)
-
-        users = [u for u in users]
-
-        return users, count
-
     def get_by_id(self, id: uuid.UUID) -> User:
         return self.user_repository.get_by_id(id)
 
@@ -73,6 +59,13 @@ class UserService:
 
     def get_by_username(self, username: str) -> User:
         return self.user_repository.get_by_username(username)
+
+    def get_public_users(self, offset: int, limit: int) -> UsersPublic:
+        users, count = self.user_repository.get_users(offset, limit)
+
+        users_public = [UserPublic.model_validate(user) for user in users]
+
+        return UsersPublic(users=users_public, count=count)
 
     def authenticate(
         self,
