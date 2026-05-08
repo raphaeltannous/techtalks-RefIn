@@ -178,11 +178,11 @@ class UserService:
         password_reset_request: PasswordResetRequest,
         background_tasks: BackgroundTasks,
     ) -> None:
-        user = self.get_by_email(
-            email=password_reset_request.email,
-        )
-
-        if not user:
+        try:
+            user = self.get_by_email(
+                email=password_reset_request.email,
+            )
+        except UserNotFoundError:  # Timing attack?
             return None
 
         token = secrets.token_hex(32)
