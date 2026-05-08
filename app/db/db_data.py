@@ -7,7 +7,7 @@ from services.user import UserService
 def init(
     user_service: UserService,
 ) -> None:
-    _, count = user_service.get_private_users(offset=0, limit=1)
+    _, count = user_service.get_public_users(offset=0, limit=1)
 
     if count == 0:
         user = User(
