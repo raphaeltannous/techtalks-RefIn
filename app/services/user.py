@@ -101,7 +101,7 @@ class UserService:
                 hashed_password=updated_password_hash,
             )
 
-            self.user_repository.update_user(
+            self.user_repository.update(
                 user,
                 user_in,
             )
@@ -135,7 +135,7 @@ class UserService:
         except UserNotFoundError:
             pass
 
-        return self.user_repository.add_user(
+        return self.user_repository.add(
             user_in=user_in,
         )
 
@@ -260,7 +260,7 @@ class UserService:
             hashed_password=password_hash,
         )
 
-        db_user = self.user_repository.update_user(
+        db_user = self.user_repository.update(
             db_user,
             user_in,
         )
@@ -364,7 +364,7 @@ class UserService:
             )
             raise InvalidEmailVerificationToken()
 
-        self.user_repository.update_user(
+        self.user_repository.update(
             db_user,
             UserUpdate(is_verified=True),
         )

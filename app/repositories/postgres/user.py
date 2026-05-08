@@ -74,7 +74,7 @@ class PostgresUserRepository(UserRepository):
 
             return user
 
-    def add_user(
+    def add(
         self,
         user_in: User,
     ) -> User:
@@ -90,7 +90,7 @@ class PostgresUserRepository(UserRepository):
 
             return user_in
 
-    def update_user(
+    def update(
         self,
         user_db: User,
         user_in: UserUpdate,
