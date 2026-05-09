@@ -168,3 +168,11 @@ class JobNotFoundError(HTTPException):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Job not found",
         )
+
+
+class JobLanguageNotFoundError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Job language not found",
+        )
