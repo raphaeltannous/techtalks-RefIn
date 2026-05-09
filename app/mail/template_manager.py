@@ -2,6 +2,7 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 from models.user import User
+from models.user_profile import UserProfile
 from pydantic import EmailStr
 
 from mail.mailer import EmailData
@@ -38,17 +39,19 @@ class EmailTemplateManager:
     def welcome_email(
         self,
         user: User,
+        user_profile: UserProfile,
     ) -> EmailData:
         return self.__render_template(
             template_name="welcome.html",
             recipient=user.email,
             subject="Welcome to RefIn!",
-            name=user.name,
+            name=user_profile.name,
         )
 
     def email_verification_email(
         self,
         user: User,
+        user_profile: UserProfile,
         verification_link: str,
         expiration_minutes: int = 10,
     ) -> EmailData:
@@ -56,7 +59,7 @@ class EmailTemplateManager:
             template_name="email_verification.html",
             recipient=user.email,
             subject="Email Verification",
-            name=user.name,
+            name=user_profile.name,
             verification_link=verification_link,
             expiration_minutes=expiration_minutes,
         )
@@ -64,6 +67,7 @@ class EmailTemplateManager:
     def password_reset_email(
         self,
         user: User,
+        user_profile: UserProfile,
         reset_link: str,
         expiration_minutes: int = 10,
     ) -> EmailData:
@@ -71,7 +75,7 @@ class EmailTemplateManager:
             template_name="password_reset.html",
             recipient=user.email,
             subject="Reset your password",
-            name=user.name,
+            name=user_profile.name,
             reset_link=reset_link,
             expiration_minutes=expiration_minutes,
         )
@@ -79,10 +83,11 @@ class EmailTemplateManager:
     def password_updated(
         self,
         user: User,
+        user_profile: UserProfile,
     ) -> EmailData:
         return self.__render_template(
             template_name="password_updated.html",
             recipient=user.email,
             subject="Your password is updated",
-            name=user.name,
+            name=user_profile.name,
         )

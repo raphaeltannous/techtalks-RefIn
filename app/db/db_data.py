@@ -22,6 +22,7 @@ def init(
 
         admin_user = user_service.add(
             user_in=admin_user,
+            name=settings.FIRST_ADMIN_NAME,
         )
     except DuplicateUserError:
         pass

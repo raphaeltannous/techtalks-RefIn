@@ -55,6 +55,7 @@ async def lifespan(app: FastAPI):
     # Initialize Services
     app.state.user_service = UserService(
         user_repository=user_repository,
+        user_profile_repository=user_profile_repository,
         password_reset_repository=password_reset_repository,
         email_verification_repository=email_verification_repository,
         mail_template_manager=mail_template_manager,

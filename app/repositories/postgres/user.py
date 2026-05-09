@@ -77,12 +77,16 @@ class PostgresUserRepository(UserRepository):
     def add(
         self,
         user_in: User,
+        name: str | None,
     ) -> User:
         with Session(self.engine) as session:
             session.add(user_in)
             session.flush()
 
-            profile = UserProfile(user_id=user_in.id)
+            profile = UserProfile(
+                user_id=user_in.id,
+                name=name,
+            )
             session.add(profile)
 
             session.commit()
