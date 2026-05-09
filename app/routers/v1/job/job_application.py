@@ -103,7 +103,7 @@ def update(
     application_in: JobApplicationUpdate,
 ) -> Any:
     """
-    Update a job application requirement.
+    Update a job application.
     """
     return job_service.application_service.update(
         user=user,
@@ -123,7 +123,7 @@ def delete(
     application_id: uuid.UUID,
 ) -> Any:
     """
-    Delete a job application requirement.
+    Delete a job application.
     """
     job_service.application_service.delete(
         user=user,
