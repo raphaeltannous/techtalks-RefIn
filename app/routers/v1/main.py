@@ -5,5 +5,5 @@ from .user_profile.main import main_user_profile_router
 
 api_v1_router = APIRouter()
 
-api_v1_router.include_router(main_user_profile_router, prefix="/user")
 api_v1_router.include_router(main_job_router, prefix="/job")
+api_v1_router.include_router(main_user_profile_router, prefix="/user")

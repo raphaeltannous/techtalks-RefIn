@@ -11,8 +11,11 @@ from models.job import (
 )
 from models.user import User
 from repositories.job import JobRepository
+from repositories.job_application import JobApplicationRepository
 from repositories.job_language import JobLanguageRepository
 from repositories.user import UserRepository
+
+from services.job_application import JobApplicationService
 
 from .job_language import JobLanguageService
 
@@ -23,6 +26,7 @@ class JobService:
         user_repository: UserRepository,
         job_repository: JobRepository,
         job_language_repository: JobLanguageRepository,
+        job_application_repository: JobApplicationRepository,
     ) -> None:
         self.user_repository = user_repository
         self.job_repository = job_repository
@@ -30,6 +34,10 @@ class JobService:
         self.language_service = JobLanguageService(
             job_repository,
             job_language_repository,
+        )
+        self.application_service = JobApplicationService(
+            job_repository,
+            job_application_repository,
         )
 
         self.logger = logging.getLogger("uvicorn.error")
