@@ -36,7 +36,7 @@ def get_all_languages_by_job_id(
 
 
 @router.post(
-    "/",
+    "/by-job/{job_id}",
     response_model=JobLanguagePublic,
 )
 def add_language(
