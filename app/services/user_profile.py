@@ -41,14 +41,7 @@ class UserProfileService:
         user_certificate_repository: UserCertificateRepository,
     ) -> None:
         self.user_repository = user_repository
-        self.user_skill_repository = user_skill_repository
         self.user_profile_repository = user_profile_repository
-        self.user_language_repository = user_language_repository
-        self.user_link_repository = user_link_repository
-        self.user_experience_repository = user_experience_repository
-        self.user_project_repository = user_project_repository
-        self.user_education_repository = user_education_repository
-        self.user_certificate_repository = user_certificate_repository
 
         self.skill_service = UserSkillService(
             user_repository,

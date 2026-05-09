@@ -26,7 +26,6 @@ class JobService:
     ) -> None:
         self.user_repository = user_repository
         self.job_repository = job_repository
-        self.job_language_repository = job_language_repository
 
         self.language_service = JobLanguageService(
             job_repository,
