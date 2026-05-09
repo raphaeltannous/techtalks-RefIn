@@ -22,6 +22,7 @@ from app.models.email_verification import EmailVerification  # noqa: F401
 from app.models.password_reset import PasswordReset  # noqa: F401
 from app.models.job import Job  # noqa: F401
 from app.models.job_language import JobLanguage  # noqa: F401
+from app.models.job_application import JobApplication  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
