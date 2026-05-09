@@ -15,7 +15,6 @@ class UserBase(SQLModel):
         max_length=75,
     )
 
-    name: str | None = Field(default=None, index=True, max_length=75)
     is_active: bool = True
     is_admin: bool = False
     is_verified: bool = Field(default=False)
@@ -69,9 +68,8 @@ class UserUpdate(UserBase):
     hashed_password: str | None = Field(default=None)
 
 
-class UserUpdateMe(SQLModel):  # Public
+class UserUpdateMe(SQLModel):
     email: EmailStr | None = Field(default=None, max_length=255)
-    name: str | None = Field(default=None, max_length=75)
 
 
 class UpdatePassword(SQLModel):
