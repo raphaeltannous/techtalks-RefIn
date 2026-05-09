@@ -23,6 +23,14 @@ class JobApplicationRepository:
         pass
 
     @abstractmethod
+    def get_by_user_id_and_job_id(
+        self,
+        user_id: uuid.UUID,
+        job_id: uuid.UUID,
+    ) -> JobApplication:
+        pass
+
+    @abstractmethod
     def get_by_id(
         self,
         application_id: uuid.UUID,

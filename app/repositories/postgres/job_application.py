@@ -42,6 +42,28 @@ class PostgresJobApplicationRepository(JobApplicationRepository):
 
             return applications
 
+    def get_by_user_id_and_job_id(
+        self,
+        user_id: uuid.UUID,
+        job_id: uuid.UUID,
+    ) -> JobApplication:
+        with Session(self.engine) as session:
+            statement = (
+                select(JobApplication)
+                .order_by(col(JobApplication.created_at).desc())
+                .where(
+                    JobApplication.user_id == user_id
+                    and JobApplication.job_id == job_id
+                )
+            )
+
+            application = session.exec(statement).first()
+
+            if application is None:
+                raise JobApplicationNotFoundError()
+
+            return application
+
     def get_by_id(
         self,
         application_id: uuid.UUID,
