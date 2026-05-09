@@ -55,7 +55,7 @@ def apply(
     )
 
 
-@router.post(
+@router.get(
     "/my-applications",
     response_model=JobApplicationsPublic,
 )
