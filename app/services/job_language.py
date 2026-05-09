@@ -33,7 +33,11 @@ class JobLanguageService:
         languages = self.job_language_repository.get_all_by_job_id(
             job_id=job_id,
         )
-        public_languages = [JobLanguagePublic.model_validate(l) for l in languages]
+
+        public_languages = [
+            JobLanguagePublic.model_validate(language) for language in languages
+        ]
+
         return JobLanguagesPublic(
             languages=public_languages,
         )

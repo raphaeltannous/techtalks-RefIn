@@ -21,7 +21,7 @@ class JobLanguageRepository:
         language_id: uuid.UUID,
     ) -> JobLanguage:
         """
-        Will raise a LanguageNotFoundError() when not found.
+        Will raise a JobLanguageNotFoundError() when not found.
         """
         pass
 
