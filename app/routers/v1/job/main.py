@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from .job import router as job_router
 from .job_application import router as job_application_router
 from .job_language import router as job_language_router
+from .job_nationality import router as job_nationality_router
 
 main_job_router = APIRouter(
     tags=["job"],
@@ -19,4 +20,8 @@ main_job_router.include_router(
 main_job_router.include_router(
     job_application_router,
     prefix="/application",
+)
+main_job_router.include_router(
+    job_nationality_router,
+    prefix="/nationality",
 )

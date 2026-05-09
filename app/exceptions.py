@@ -200,3 +200,11 @@ class AlreadyAppliedToJob(HTTPException):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Already applied to job",
         )
+
+
+class JobNationalityNotFoundError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Job nationality not found",
+        )

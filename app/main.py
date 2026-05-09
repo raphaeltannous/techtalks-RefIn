@@ -13,6 +13,7 @@ from repositories.postgres.email_verification import PostgresEmailVerificationRe
 from repositories.postgres.job import PostgresJobRepository
 from repositories.postgres.job_application import PostgresJobApplicationRepository
 from repositories.postgres.job_language import PostgresJobLanguageRepository
+from repositories.postgres.job_nationality import PostgresJobNationalityRepository
 from repositories.postgres.password_reset import PostgresPasswordResetRepository
 from repositories.postgres.user import PostgresUserRepository
 from repositories.postgres.user_certificate import PostgresUserCertificateRepository
@@ -53,6 +54,7 @@ async def lifespan(app: FastAPI):
     job_repository = PostgresJobRepository(postgres_engine)
     job_language_repository = PostgresJobLanguageRepository(postgres_engine)
     job_application_repository = PostgresJobApplicationRepository(postgres_engine)
+    job_nationality_repository = PostgresJobNationalityRepository(postgres_engine)
 
     # Initialize Services
     app.state.user_service = UserService(
@@ -81,6 +83,7 @@ async def lifespan(app: FastAPI):
         job_repository=job_repository,
         job_language_repository=job_language_repository,
         job_application_repository=job_application_repository,
+        job_nationality_repository=job_nationality_repository,
     )
 
     db_data.init(app.state.user_service)
