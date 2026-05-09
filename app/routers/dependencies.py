@@ -15,7 +15,7 @@ from services.job import JobService
 from services.user import UserService
 from services.user_profile import UserProfileService
 
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/login")
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
