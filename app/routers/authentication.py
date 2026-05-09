@@ -15,6 +15,7 @@ from .dependencies import CurrentUser
 
 router = APIRouter(
     tags=["authentication"],
+    prefix="/auth",
 )
 
 

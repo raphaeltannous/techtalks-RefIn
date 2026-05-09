@@ -8,6 +8,7 @@ from sqlmodel import Field, SQLModel
 
 
 class UserProfileBase(SQLModel):
+    name: str | None = Field(default=None, index=True, max_length=75)
     headline: str | None = Field(default=None, max_length=100)
     about: str | None = Field(default=None, max_length=1_000)
     location: str | None = Field(default=None, max_length=200)
@@ -49,6 +50,7 @@ class UserProfile(UserProfileBase, table=True):
 
 
 class UserProfileUpdate(SQLModel):
+    name: str | None = Field(default=None, max_length=75)
     headline: str | None = Field(default=None, max_length=100)
     about: str | None = Field(default=None, max_length=1_000)
     location: str | None = Field(default=None, max_length=200)

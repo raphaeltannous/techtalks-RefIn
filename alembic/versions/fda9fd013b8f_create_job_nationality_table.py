@@ -1,8 +1,8 @@
-"""add_job_nationality_table
+"""create job nationality table
 
-Revision ID: 1191548d39b0
-Revises: efe293ad5330
-Create Date: 2026-05-09 16:46:51.275191
+Revision ID: fda9fd013b8f
+Revises: 600c08cd7259
+Create Date: 2026-05-09 22:54:18.217610
 
 """
 from typing import Sequence, Union
@@ -13,8 +13,8 @@ import sqlmodel.sql.sqltypes
 
 
 # revision identifiers, used by Alembic.
-revision: str = '1191548d39b0'
-down_revision: Union[str, Sequence[str], None] = 'efe293ad5330'
+revision: str = 'fda9fd013b8f'
+down_revision: Union[str, Sequence[str], None] = '600c08cd7259'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

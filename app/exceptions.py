@@ -178,6 +178,30 @@ class JobLanguageNotFoundError(HTTPException):
         )
 
 
+class JobApplicationNotFoundError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,  # should these be 404?
+            detail="Job application not found",
+        )
+
+
+class JobDoesNotAcceptApplications(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Job does not accept job applications",
+        )
+
+
+class AlreadyAppliedToJob(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Already applied to job",
+        )
+
+
 class JobNationalityNotFoundError(HTTPException):
     def __init__(self):
         super().__init__(

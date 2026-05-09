@@ -11,9 +11,12 @@ from models.job import (
 )
 from models.user import User
 from repositories.job import JobRepository
+from repositories.job_application import JobApplicationRepository
 from repositories.job_language import JobLanguageRepository
 from repositories.job_nationality import JobNationalityRepository
 from repositories.user import UserRepository
+
+from services.job_application import JobApplicationService
 
 from .job_language import JobLanguageService
 from .job_nationality import JobNationalityService
@@ -25,6 +28,7 @@ class JobService:
         user_repository: UserRepository,
         job_repository: JobRepository,
         job_language_repository: JobLanguageRepository,
+        job_application_repository: JobApplicationRepository,
         job_nationality_repository: JobNationalityRepository,
     ) -> None:
         self.user_repository = user_repository
@@ -34,7 +38,10 @@ class JobService:
             job_repository,
             job_language_repository,
         )
-
+        self.application_service = JobApplicationService(
+            job_repository,
+            job_application_repository,
+        )
         self.nationality_service = JobNationalityService(
             job_repository,
             job_nationality_repository,

@@ -5,11 +5,6 @@ from sqlmodel import SQLModel
 
 from alembic import context
 from app.config import settings
-from app.models.email_verification import EmailVerification  # noqa: F401
-from app.models.job import Job  # noqa: F401
-from app.models.job_language import JobLanguage  # noqa: F401
-from app.models.job_nationality import JobNationality  # noqa: F401
-from app.models.password_reset import PasswordReset  # noqa: F401
 
 # Make sure to import all the table models
 # from app.models so that they are detect
@@ -23,6 +18,12 @@ from app.models.user_link import UserLink  # noqa: F401
 from app.models.user_profile import UserProfile  # noqa: F401
 from app.models.user_project import UserProject  # noqa: F401
 from app.models.user_skill import UserSkill  # noqa: F401
+from app.models.email_verification import EmailVerification  # noqa: F401
+from app.models.password_reset import PasswordReset  # noqa: F401
+from app.models.job import Job  # noqa: F401
+from app.models.job_language import JobLanguage  # noqa: F401
+from app.models.job_application import JobApplication  # noqa: F401
+from app.models.job_nationality import JobNationality  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

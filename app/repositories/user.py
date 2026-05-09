@@ -51,6 +51,7 @@ class UserRepository:
     def add(
         self,
         user_in: User,
+        name: str | None,
     ) -> User:
         pass
 

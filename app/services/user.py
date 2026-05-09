@@ -29,22 +29,26 @@ from models.password_reset import (
     PasswordResetUpdate,
 )
 from models.user import User, UserPublic, UserRegister, UsersPublic, UserUpdate
+from models.user_profile import UserProfile
 from pydantic import EmailStr
 from repositories.email_verification import EmailVerificationRepository
 from repositories.password_reset import PasswordResetRepository
 from repositories.user import UserRepository
+from repositories.user_profile import UserProfileRepository
 
 
 class UserService:
     def __init__(
         self,
         user_repository: UserRepository,
+        user_profile_repository: UserProfileRepository,
         password_reset_repository: PasswordResetRepository,
         email_verification_repository: EmailVerificationRepository,
         mail_template_manager: EmailTemplateManager,
         mailer: Mailer,
     ) -> None:
         self.user_repository = user_repository
+        self.user_profile_repository = user_profile_repository
         self.password_reset_repository = password_reset_repository
         self.email_verification_repository = email_verification_repository
         self.mail_template_manager = mail_template_manager
@@ -121,6 +125,7 @@ class UserService:
         self,
         *,
         user_in: User,
+        name: str | None,
     ) -> User:
         try:
             user_db = self.get_by_email(user_in.email)
@@ -140,6 +145,7 @@ class UserService:
 
         return self.user_repository.add(
             user_in=user_in,
+            name=name,
         )
 
     def register(
@@ -159,18 +165,25 @@ class UserService:
 
         user = self.add(
             user_in=user,
+            name=user_in.name,
+        )
+
+        user_profile = self.user_profile_repository.get_by_user_id(
+            user_id=user.id,
         )
 
         background_tasks.add_task(
             self.mailer.send_html_email,
             self.mail_template_manager.welcome_email(
                 user=user,
+                user_profile=user_profile,
             ),
         )
 
         background_tasks.add_task(
             self.send_verification_email,
             user=user,
+            user_profile=user_profile,
         )
 
         return UserPublic.model_validate(user)
@@ -215,10 +228,15 @@ class UserService:
                 )
             )
 
+        user_profile = self.user_profile_repository.get_by_user_id(
+            user_id=user.id,
+        )
+
         background_tasks.add_task(
             self.mailer.send_html_email,
             self.mail_template_manager.password_reset_email(
                 user=user,
+                user_profile=user_profile,
                 reset_link=urljoin(
                     settings.FRONTEND_PASSWORD_RESET_URL + "/",
                     token,
@@ -268,6 +286,10 @@ class UserService:
             user_in,
         )
 
+        user_profile = self.user_profile_repository.get_by_user_id(
+            user_id=db_user.id,
+        )
+
         self.password_reset_repository.update(
             db_obj=pr_db_obj,
             obj_in=PasswordResetUpdate(
@@ -279,6 +301,7 @@ class UserService:
             self.mailer.send_html_email,
             self.mail_template_manager.password_updated(
                 user=db_user,
+                user_profile=user_profile,
             ),
         )
 
@@ -286,6 +309,7 @@ class UserService:
         self,
         *,
         user: User,
+        user_profile: UserProfile,
     ) -> None:
         token = secrets.token_hex(32)
         expires_at = datetime.now(timezone.utc) + timedelta(
@@ -317,6 +341,7 @@ class UserService:
         self.mailer.send_html_email(
             self.mail_template_manager.email_verification_email(
                 user=user,
+                user_profile=user_profile,
                 verification_link=urljoin(
                     settings.FRONTEND_EMAIL_VERIFICATION_URL + "/",
                     token,
@@ -334,9 +359,14 @@ class UserService:
         if current_user.is_verified:
             raise UserAlreadyVerifiedError()
 
+        user_profile = self.user_profile_repository.get_by_user_id(
+            user_id=current_user.id,
+        )
+
         background_tasks.add_task(
             self.send_verification_email,
             user=current_user,
+            user_profile=user_profile,
         )
 
     def email_verification_confirm(
