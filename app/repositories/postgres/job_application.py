@@ -52,8 +52,8 @@ class PostgresJobApplicationRepository(JobApplicationRepository):
                 select(JobApplication)
                 .order_by(col(JobApplication.created_at).desc())
                 .where(
-                    JobApplication.user_id == user_id
-                    and JobApplication.job_id == job_id
+                    (JobApplication.user_id == user_id)
+                    & (JobApplication.job_id == job_id)
                 )
             )
 
