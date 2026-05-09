@@ -82,4 +82,4 @@ class JobApplicationPublic(JobApplicationBase):
 
 
 class JobApplicationsPublic(SQLModel):
-    languages: list[JobApplicationPublic]
+    applications: list[JobApplicationPublic]
