@@ -1,19 +1,12 @@
 import uuid
 from datetime import datetime, timezone
-from enum import Enum
 
 from pydantic.alias_generators import to_snake
 from sqlalchemy import DateTime
 from sqlalchemy.orm import declared_attr
 from sqlmodel import Field, SQLModel
 
-
-class ProficiencyLevel(str, Enum):
-    elementary = "Elementary proficiency"
-    limited_working = "Limited working proficiency"
-    professional_working = "Professional working proficiency"
-    full_professional = "Full professional proficiency"
-    native_bilingual = "Native or bilingual proficiency"
+from .language_proficiency_level import ProficiencyLevel
 
 
 class UserLanguageBase(SQLModel):
