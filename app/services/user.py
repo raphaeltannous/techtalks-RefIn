@@ -406,3 +406,12 @@ class UserService:
                 expires_at=datetime.now(timezone.utc),
             ),
         )
+
+    def delete(
+        self,
+        *,
+        user: User,
+    ) -> None:
+        return self.user_repository.delete(
+            user_db=user,
+        )
