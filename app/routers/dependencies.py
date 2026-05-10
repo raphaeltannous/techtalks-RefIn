@@ -12,6 +12,7 @@ from models.user import User
 from models.user_profile import UserProfile
 from pydantic import ValidationError
 from services.job import JobService
+from services.notification import NotificationService
 from services.user import UserService
 from services.user_profile import UserProfileService
 
@@ -34,6 +35,10 @@ def get_user_profile_service(request: Request) -> UserProfileService:
 
 def get_job_service(request: Request) -> JobService:
     return request.app.state.job_service
+
+
+def get_notification_service(request: Request) -> NotificationService:
+    return request.app.state.notification_service
 
 
 def get_current_user(
