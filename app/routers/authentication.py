@@ -45,8 +45,8 @@ def login_status(
     return current_user
 
 
-@router.post(
-    "/delete",
+@router.delete(
+    "/me",
     response_model=Message,
 )
 def delete(
@@ -57,8 +57,12 @@ def delete(
     """
     Delete user.
     """
-    return user_service.delete(
+    user_service.delete(
         user=current_user,
+    )
+
+    return Message(
+        message="User deleted",
     )
 
 
