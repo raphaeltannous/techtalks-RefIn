@@ -46,6 +46,23 @@ def login_status(
 
 
 @router.post(
+    "/delete",
+    response_model=Message,
+)
+def delete(
+    *,
+    user_service: Annotated[UserService, Depends(get_user_service)],
+    current_user: CurrentUser,
+) -> Any:
+    """
+    Delete user.
+    """
+    return user_service.delete(
+        user=current_user,
+    )
+
+
+@router.post(
     "/register",
     response_model=UserPublic,
 )
