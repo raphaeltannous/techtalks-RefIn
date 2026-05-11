@@ -46,7 +46,6 @@ class Notification(NotificationBase, table=True):
 
 class NotificationPublic(NotificationBase):
     id: uuid.UUID
-    user_id: uuid.UUID
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

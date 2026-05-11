@@ -15,9 +15,11 @@ from models.job_application import (
     JobApplicationStatus,
     JobApplicationUpdate,
 )
+from models.notification import Notification
 from models.user import User
 from repositories.job import JobRepository
 from repositories.job_application import JobApplicationRepository
+from repositories.notification import NotificationRepository
 
 
 class JobApplicationService:
@@ -25,9 +27,11 @@ class JobApplicationService:
         self,
         job_repository: JobRepository,
         job_application_repository: JobApplicationRepository,
+        notification_repository: NotificationRepository,
     ) -> None:
         self.job_repository = job_repository
         self.job_application_repository = job_application_repository
+        self.notification_repository = notification_repository
 
         self.logger = logging.getLogger("uvicorn.error")
 
@@ -133,6 +137,13 @@ class JobApplicationService:
             application,
         )
 
+        self.notification_repository.add(
+            Notification(
+                user_id=job.user_id,
+                message=f"Someone applied to your job: {job.title}",
+            )
+        )
+
         return JobApplicationPublic.model_validate(
             application,
         )
@@ -159,6 +170,14 @@ class JobApplicationService:
             application_db=application,
             application_in=application_in,
         )
+
+        self.notification_repository.add(
+            Notification(
+                user_id=application.user_id,
+                message=f"Your application status for {job.title} has been updated to: {application.status.value}",
+            )
+        )
+
         return JobApplicationPublic.model_validate(
             application,
         )
