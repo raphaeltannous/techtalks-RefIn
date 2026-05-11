@@ -83,7 +83,7 @@ class UserService:
         user_id: uuid.UUID,
         user_in: UserUpdate,
     ) -> User:
-        user_in.hashed_password = None
+        del user_in.hashed_password
         if user_in.password:
             user_in.hashed_password = security.password_hashing.get_password_hash(
                 user_in.password,
