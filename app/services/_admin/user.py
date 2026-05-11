@@ -83,17 +83,27 @@ class UserService:
         user_id: uuid.UUID,
         user_in: UserUpdate,
     ) -> User:
-        del user_in.hashed_password
+        updated_data = user_in.model_dump(
+            exclude_unset=True,
+            exclude={
+                "hashed_password",
+                "password",
+            },
+        )
+
         if user_in.password:
-            user_in.hashed_password = security.password_hashing.get_password_hash(
-                user_in.password,
+            updated_data["hashed_password"] = (
+                security.password_hashing.get_password_hash(
+                    user_in.password,
+                )
             )
 
         user = self.get_by_id(user_id)
+        user_update = UserUpdate(**updated_data)
 
         user = self.user_repository.update(
             user_db=user,
-            user_in=user_in,
+            user_in=user_update,
         )
 
         return user
