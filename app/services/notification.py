@@ -1,7 +1,7 @@
 import logging
 import uuid
 
-from exceptions import ForbiddenAction, NotificationNotFoundError
+from exceptions import ForbiddenAction
 from models.notification import (
     Notification,
     NotificationPublic,
