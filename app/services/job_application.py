@@ -136,12 +136,14 @@ class JobApplicationService:
         application = self.job_application_repository.add(
             application,
         )
+
         self.notification_repository.add(
             Notification(
                 user_id=job.user_id,
                 message=f"Someone applied to your job: {job.title}",
             )
         )
+
         return JobApplicationPublic.model_validate(
             application,
         )
@@ -168,6 +170,14 @@ class JobApplicationService:
             application_db=application,
             application_in=application_in,
         )
+
+        self.notification_repository.add(
+            Notification(
+                user_id=application.user_id,
+                message=f"Your application status for {job.title} has been updated to: {application.status.value}",
+            )
+        )
+
         return JobApplicationPublic.model_validate(
             application,
         )
