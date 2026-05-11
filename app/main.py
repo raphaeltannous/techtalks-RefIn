@@ -26,6 +26,7 @@ from repositories.postgres.user_profile import PostgresUserProfileRepository
 from repositories.postgres.user_project import PostgresUserProjectRepository
 from repositories.postgres.user_skill import PostgresUserSkillRepository
 from routers.main import api_router
+from services.admin import AdminService
 from services.job import JobService
 from services.notification import NotificationService
 from services.user import UserService
@@ -92,6 +93,23 @@ async def lifespan(app: FastAPI):
 
     app.state.notification_service = NotificationService(
         user_repository=user_repository,
+        notification_repository=notification_repository,
+    )
+
+    app.state.admin_service = AdminService(
+        user_repository=user_repository,
+        user_skill_repository=user_skill_repository,
+        user_profile_repository=user_profile_repository,
+        user_language_repository=user_language_repository,
+        user_link_repository=user_link_repository,
+        user_project_repository=user_project_repository,
+        user_certificate_repository=user_certificate_repository,
+        user_experience_repository=user_experience_repository,
+        user_education_repository=user_education_repository,
+        job_repository=job_repository,
+        job_language_repository=job_language_repository,
+        job_application_repository=job_application_repository,
+        job_nationality_repository=job_nationality_repository,
         notification_repository=notification_repository,
     )
 
