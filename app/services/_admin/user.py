@@ -6,11 +6,8 @@ from exceptions import (
     DuplicateUserError,
     UserNotFoundError,
 )
-from mail.mailer import Mailer
-from mail.template_manager import EmailTemplateManager
 from models.user import User, UserPublic, UsersPublic, UserUpdate
 from pydantic import EmailStr
-from repositories.email_verification import EmailVerificationRepository
 from repositories.password_reset import PasswordResetRepository
 from repositories.user import UserRepository
 from repositories.user_profile import UserProfileRepository
