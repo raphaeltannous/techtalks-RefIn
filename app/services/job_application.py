@@ -139,7 +139,7 @@ class JobApplicationService:
         self.notification_repository.add(
             Notification(
                 user_id=job.user_id,
-                message=f"Someone apploed to your job: {job.title}",
+                message=f"Someone applied to your job: {job.title}",
             )
         )
         return JobApplicationPublic.model_validate(
