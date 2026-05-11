@@ -8,9 +8,7 @@ from exceptions import (
 )
 from models.user import User, UserPublic, UsersPublic, UserUpdate
 from pydantic import EmailStr
-from repositories.password_reset import PasswordResetRepository
 from repositories.user import UserRepository
-from repositories.user_profile import UserProfileRepository
 
 
 class UserService:
@@ -18,12 +16,8 @@ class UserService:
         self,
         *,
         user_repository: UserRepository,
-        user_profile_repository: UserProfileRepository,
-        password_reset_repository: PasswordResetRepository,
     ) -> None:
         self.user_repository = user_repository
-        self.user_profile_repository = user_profile_repository
-        self.password_reset_repository = password_reset_repository
 
         self.logger = logging.getLogger("uvicorn.error")
 
