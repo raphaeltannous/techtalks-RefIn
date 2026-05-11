@@ -23,7 +23,7 @@ class NotificationService:
 
         self.logger = logging.getLogger("uvicorn.error")
 
-    def get_all(
+    def get_all_by_user(
         self,
         *,
         user: User,
