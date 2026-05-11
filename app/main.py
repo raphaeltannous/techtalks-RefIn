@@ -87,6 +87,7 @@ async def lifespan(app: FastAPI):
         job_language_repository=job_language_repository,
         job_application_repository=job_application_repository,
         job_nationality_repository=job_nationality_repository,
+        notification_repository=notification_repository,
     )
 
     app.state.notification_service = NotificationService(
