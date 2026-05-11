@@ -11,6 +11,7 @@ from models.jwt import TokenPayload
 from models.user import User
 from models.user_profile import UserProfile
 from pydantic import ValidationError
+from services.admin import AdminService
 from services.job import JobService
 from services.notification import NotificationService
 from services.user import UserService
@@ -41,7 +42,7 @@ def get_notification_service(request: Request) -> NotificationService:
     return request.app.state.notification_service
 
 
-def get_admin_service(request: Request) -> NotificationService:
+def get_admin_service(request: Request) -> AdminService:
     return request.app.state.admin_service
 
 
