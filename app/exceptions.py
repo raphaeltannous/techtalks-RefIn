@@ -208,3 +208,11 @@ class JobNationalityNotFoundError(HTTPException):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Job nationality not found",
         )
+
+
+class NotificationNotFoundError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Notification not found",
+        )

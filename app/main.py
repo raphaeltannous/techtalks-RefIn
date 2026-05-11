@@ -14,6 +14,7 @@ from repositories.postgres.job import PostgresJobRepository
 from repositories.postgres.job_application import PostgresJobApplicationRepository
 from repositories.postgres.job_language import PostgresJobLanguageRepository
 from repositories.postgres.job_nationality import PostgresJobNationalityRepository
+from repositories.postgres.notification import PostgresNotificationRepository
 from repositories.postgres.password_reset import PostgresPasswordResetRepository
 from repositories.postgres.user import PostgresUserRepository
 from repositories.postgres.user_certificate import PostgresUserCertificateRepository
@@ -26,6 +27,7 @@ from repositories.postgres.user_project import PostgresUserProjectRepository
 from repositories.postgres.user_skill import PostgresUserSkillRepository
 from routers.main import api_router
 from services.job import JobService
+from services.notification import NotificationService
 from services.user import UserService
 from services.user_profile import UserProfileService
 
@@ -56,6 +58,7 @@ async def lifespan(app: FastAPI):
     job_application_repository = PostgresJobApplicationRepository(postgres_engine)
     job_nationality_repository = PostgresJobNationalityRepository(postgres_engine)
 
+    notification_repository = PostgresNotificationRepository(postgres_engine)
     # Initialize Services
     app.state.user_service = UserService(
         user_repository=user_repository,
@@ -84,6 +87,11 @@ async def lifespan(app: FastAPI):
         job_language_repository=job_language_repository,
         job_application_repository=job_application_repository,
         job_nationality_repository=job_nationality_repository,
+    )
+
+    app.state.notification_service = NotificationService(
+        user_repository=user_repository,
+        notification_repository=notification_repository,
     )
 
     db_data.init(app.state.user_service)
