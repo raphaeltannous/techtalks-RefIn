@@ -66,6 +66,7 @@ class UserUpdate(UserBase):
     username: str | None = Field(default=None, min_length=4, max_length=75)  # type: ignore[assignment]
     email: EmailStr | None = Field(default=None, max_length=255)
     hashed_password: str | None = Field(default=None)
+    password: str | None = Field(default=None)
 
 
 class UserUpdateMe(SQLModel):
