@@ -14,6 +14,7 @@ from repositories.job import JobRepository
 from repositories.job_application import JobApplicationRepository
 from repositories.job_language import JobLanguageRepository
 from repositories.job_nationality import JobNationalityRepository
+from repositories.notification import NotificationRepository
 from repositories.user import UserRepository
 
 from services.job_application import JobApplicationService
@@ -30,6 +31,7 @@ class JobService:
         job_language_repository: JobLanguageRepository,
         job_application_repository: JobApplicationRepository,
         job_nationality_repository: JobNationalityRepository,
+        notification_repository: NotificationRepository,
     ) -> None:
         self.user_repository = user_repository
         self.job_repository = job_repository
@@ -41,6 +43,7 @@ class JobService:
         self.application_service = JobApplicationService(
             job_repository,
             job_application_repository,
+            notification_repository,
         )
         self.nationality_service = JobNationalityService(
             job_repository,
