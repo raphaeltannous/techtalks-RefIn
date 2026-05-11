@@ -53,7 +53,7 @@ def apply(
 
 
 @router.get(
-    "/my-applications",
+    "/by-user-id/{user_id}",
     response_model=JobApplicationsPublic,
 )
 def get_all_by_user(
