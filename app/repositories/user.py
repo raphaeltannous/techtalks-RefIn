@@ -62,3 +62,10 @@ class UserRepository:
         user_in: UserUpdate,
     ) -> User:
         pass
+
+    @abstractmethod
+    def delete(
+        self,
+        user_db: User,
+    ) -> None:
+        pass

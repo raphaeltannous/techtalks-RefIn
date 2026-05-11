@@ -22,10 +22,10 @@ router = APIRouter(
 @router.post("/login")
 def login(
     *,
-    user_repository: Annotated[UserService, Depends(get_user_service)],
+    user_service: Annotated[UserService, Depends(get_user_service)],
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
-    return user_repository.authenticate(
+    return user_service.authenticate(
         email=form_data.username,
         password=form_data.password,
     )
@@ -45,20 +45,41 @@ def login_status(
     return current_user
 
 
+@router.delete(
+    "/me",
+    response_model=Message,
+)
+def delete(
+    *,
+    user_service: Annotated[UserService, Depends(get_user_service)],
+    current_user: CurrentUser,
+) -> Any:
+    """
+    Delete user.
+    """
+    user_service.delete(
+        user=current_user,
+    )
+
+    return Message(
+        message="User deleted",
+    )
+
+
 @router.post(
     "/register",
     response_model=UserPublic,
 )
 def register(
     *,
-    user_repository: Annotated[UserService, Depends(get_user_service)],
+    user_service: Annotated[UserService, Depends(get_user_service)],
     user_in: UserRegister,
     background_tasks: BackgroundTasks,
 ) -> Any:
     """
     Register.
     """
-    return user_repository.register(
+    return user_service.register(
         user_in=user_in,
         background_tasks=background_tasks,
     )
