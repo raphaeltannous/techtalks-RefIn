@@ -13,7 +13,7 @@ from routers.dependencies import get_admin_service
 from services.admin import AdminService
 
 router = APIRouter(
-    tags=["job-language"],
+    tags=["admin-job-language"],
 )
 
 
