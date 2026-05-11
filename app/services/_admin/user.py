@@ -23,16 +23,10 @@ class UserService:
         user_repository: UserRepository,
         user_profile_repository: UserProfileRepository,
         password_reset_repository: PasswordResetRepository,
-        email_verification_repository: EmailVerificationRepository,
-        mail_template_manager: EmailTemplateManager,
-        mailer: Mailer,
     ) -> None:
         self.user_repository = user_repository
         self.user_profile_repository = user_profile_repository
         self.password_reset_repository = password_reset_repository
-        self.email_verification_repository = email_verification_repository
-        self.mail_template_manager = mail_template_manager
-        self.mailer = mailer
 
         self.logger = logging.getLogger("uvicorn.error")
 
