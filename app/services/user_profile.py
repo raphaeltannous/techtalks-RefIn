@@ -1,13 +1,8 @@
 import logging
 import uuid
-from io import BytesIO
 
-from config import settings
-from exceptions import (
-    InvalidImageError,
-)
+import image_management.user_profile
 from models.user_profile import UserProfile, UserProfilePublic, UserProfileUpdate
-from PIL import Image, ImageOps
 from repositories.user import UserRepository
 from repositories.user_certificate import UserCertificateRepository
 from repositories.user_education import UserEducationRepository
@@ -132,14 +127,18 @@ class UserProfileService:
             user_profile.profile_picture
         )  # Save old filename for deletion.
 
-        new_image_filename = self.__process_profile_picture(image_bytes)
+        new_image_filename = image_management.user_profile.process_profile_picture(
+            image_bytes,
+        )
 
         self.user_profile_repository.update_profile_picture(
             user_profile,
             new_image_filename,
         )
 
-        self.__delete_profile_picture(old_image_filename)
+        image_management.user_profile.delete_profile_picture(
+            old_image_filename,
+        )
 
         return user_profile
 
@@ -151,106 +150,17 @@ class UserProfileService:
     ) -> UserProfile:
         old_image_filename = user_profile.banner
 
-        new_image_filename = self.__process_banner(image_bytes)
+        new_image_filename = image_management.user_profile.process_banner(
+            image_bytes,
+        )
 
         self.user_profile_repository.update_banner(
             user_profile,
             new_image_filename,
         )
 
-        self.__delete_banner(old_image_filename)
+        image_management.user_profile.delete_banner(
+            old_image_filename,
+        )
 
         return user_profile
-
-    # Private helper functions
-    def __delete_profile_picture(self, filename: str | None):
-        if filename is None:
-            return
-
-        file_path = settings.USER_PROFILE_PICTURES_DIRECTORY.joinpath(
-            filename
-        ).absolute()
-
-        if file_path.exists():
-            file_path.unlink()
-
-    def __process_profile_picture(self, image_bytes: bytes) -> str:
-        try:
-            original = Image.open(BytesIO(image_bytes))
-        except Exception:
-            raise InvalidImageError()
-
-        original = ImageOps.exif_transpose(original)
-
-        # Resize and crop to 300x300
-        image = original.copy()
-        image.thumbnail((300, 300), Image.Resampling.LANCZOS)
-        image = ImageOps.fit(
-            image,
-            (300, 300),
-            Image.Resampling.LANCZOS,
-            centering=(0.5, 0.5),
-        )
-
-        if image.mode != "RGB":
-            image = image.convert("RGB")
-
-        filename = f"{uuid.uuid4()}.jpg"
-        filepath = settings.USER_PROFILE_PICTURES_DIRECTORY.joinpath(
-            filename
-        ).absolute()
-
-        image.save(
-            filepath,
-            "JPEG",
-            quality=85,
-            optimize=True,
-        )
-
-        return filename
-
-    def __delete_banner(self, filename: str | None):
-        if filename is None:
-            return
-
-        file_path = settings.USER_PROFILE_BANNERS_DIRECTORY.joinpath(
-            filename
-        ).absolute()
-
-        if file_path.exists():
-            file_path.unlink()
-
-    def __process_banner(self, image_bytes: bytes) -> str:
-        try:
-            original = Image.open(BytesIO(image_bytes))
-        except Exception:
-            raise InvalidImageError()
-
-        original = ImageOps.exif_transpose(original)
-
-        # Resize and crop to 700x300
-        image = original.copy()
-        image.thumbnail((700, 300), Image.Resampling.LANCZOS)
-        image = ImageOps.fit(
-            image,
-            (700, 300),
-            Image.Resampling.LANCZOS,
-            centering=(0.5, 0.5),
-        )
-
-        if image.mode != "RGB":
-            image = image.convert("RGB")
-
-        filename = f"{uuid.uuid4()}.jpg"
-        filepath = settings.USER_PROFILE_BANNERS_DIRECTORY.joinpath(
-            filename,
-        ).absolute()
-
-        image.save(
-            filepath,
-            "JPEG",
-            quality=85,
-            optimize=True,
-        )
-
-        return filename
