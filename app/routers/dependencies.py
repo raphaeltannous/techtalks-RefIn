@@ -41,6 +41,10 @@ def get_notification_service(request: Request) -> NotificationService:
     return request.app.state.notification_service
 
 
+def get_admin_service(request: Request) -> NotificationService:
+    return request.app.state.admin_service
+
+
 def get_current_user(
     token: TokenDep,
     user_service: Annotated[UserService, Depends(get_user_service)],
