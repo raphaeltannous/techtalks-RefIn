@@ -110,3 +110,11 @@ class PostgresUserRepository(UserRepository):
             session.refresh(user_db)
 
             return user_db
+
+    def delete(
+        self,
+        user_db: User,
+    ) -> None:
+        with Session(self.engine) as session:
+            session.delete(user_db)
+            session.commit()
