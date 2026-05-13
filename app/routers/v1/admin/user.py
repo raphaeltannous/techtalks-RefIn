@@ -49,7 +49,7 @@ def get_by_username(
 
 
 @router.get(
-    "/by-id/{id}",
+    "/{id}",
     response_model=UserPublicAdmin,
 )
 def get_by_id(
