@@ -6,7 +6,13 @@ from exceptions import (
     DuplicateUserError,
     UserNotFoundError,
 )
-from models.user import User, UserPublic, UsersPublic, UserUpdate
+from models.user import (
+    User,
+    UserPublicAdmin,
+    UserRegister,
+    UsersPublicAdmin,
+    UserUpdate,
+)
 from pydantic import EmailStr
 from repositories.user import UserRepository
 
@@ -23,41 +29,52 @@ class UserService:
 
     def get_by_id(
         self,
+        *,
         id: uuid.UUID,
-    ) -> User:
-        return self.user_repository.get_by_id(id)
+    ) -> UserPublicAdmin:
+        user = self.user_repository.get_by_id(id)
+
+        return UserPublicAdmin.model_validate(user)
 
     def get_by_email(
         self,
+        *,
         email: EmailStr,
-    ) -> User:
-        return self.user_repository.get_by_email(email)
+    ) -> UserPublicAdmin:
+        user = self.user_repository.get_by_email(email)
+
+        return UserPublicAdmin.model_validate(user)
 
     def get_by_username(
         self,
+        *,
         username: str,
-    ) -> User:
-        return self.user_repository.get_by_username(username)
+    ) -> UserPublicAdmin:
+        user = self.user_repository.get_by_username(username)
+
+        return UserPublicAdmin.model_validate(user)
 
     def get_public_users(
         self,
         offset: int,
         limit: int,
-    ) -> UsersPublic:
+    ) -> UsersPublicAdmin:
         users, count = self.user_repository.get_users(offset, limit)
 
-        users_public = [UserPublic.model_validate(user) for user in users]
+        users_public = [UserPublicAdmin.model_validate(user) for user in users]
 
-        return UsersPublic(users=users_public, count=count)
+        return UsersPublicAdmin(
+            users=users_public,
+            count=count,
+        )
 
     def add(
         self,
         *,
-        user_in: User,
-        name: str | None,
-    ) -> User:
+        user_in: UserRegister,
+    ) -> UserPublicAdmin:
         try:
-            user_db = self.get_by_email(user_in.email)
+            user_db = self.user_repository.get_by_email(user_in.email)
 
             if user_db is not None:
                 raise DuplicateUserError()
@@ -65,17 +82,28 @@ class UserService:
             pass
 
         try:
-            user_db = self.get_by_username(user_in.username)
+            user_db = self.user_repository.get_by_username(user_in.username)
 
             if user_db is not None:
                 raise DuplicateUserError()
         except UserNotFoundError:
             pass
 
-        return self.user_repository.add(
-            user_in=user_in,
-            name=name,
+        user = User.model_validate(
+            user_in,
+            update={
+                "hashed_password": security.password_hashing.get_password_hash(
+                    user_in.password,
+                ),
+            },
         )
+
+        user = self.user_repository.add(
+            user_in=user,
+            name=user_in.name,
+        )
+
+        return UserPublicAdmin.model_validate(user)
 
     def update(
         self,
@@ -98,7 +126,7 @@ class UserService:
                 )
             )
 
-        user = self.get_by_id(user_id)
+        user = self.user_repository.get_by_id(user_id)
         user_update = UserUpdate(**updated_data)
 
         user = self.user_repository.update(
@@ -113,7 +141,7 @@ class UserService:
         *,
         user_id: uuid.UUID,
     ) -> None:
-        user = self.get_by_id(user_id)
+        user = self.user_repository.get_by_id(user_id)
 
         return self.user_repository.delete(
             user_db=user,
