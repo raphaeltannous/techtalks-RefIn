@@ -95,3 +95,16 @@ class UserPublic(UserBase):
 class UsersPublic(SQLModel):
     users: list[UserPublic]
     count: int
+
+
+class UserPublicAdmin(UserBase):
+    id: uuid.UUID
+    email: EmailStr
+
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class UsersPublicAdmin(SQLModel):
+    users: list[UserPublicAdmin]
+    count: int
