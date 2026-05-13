@@ -72,7 +72,7 @@ class UserService:
         self,
         *,
         user_in: UserRegister,
-    ) -> User:
+    ) -> UserPublicAdmin:
         try:
             user_db = self.user_repository.get_by_email(user_in.email)
 
@@ -98,10 +98,12 @@ class UserService:
             },
         )
 
-        return self.user_repository.add(
+        user = self.user_repository.add(
             user_in=user,
             name=user_in.name,
         )
+
+        return UserPublicAdmin.model_validate(user)
 
     def update(
         self,
